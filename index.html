@@ -1,11 +1,16 @@
 <!DOCTYPE html>
 <html lang="ko" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#090D16">
+    <!-- 완벽한 어플(Standalone) 모드 실행을 위한 PWA 설정 -->
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a1a1a">
+    <link rel="manifest" href='data:application/manifest+json;charset=utf-8,{"name":"Timer Plus Pro","short_name":"TimerPro","display":"standalone","background_color":"#1a1a1a","theme_color":"#1a1a1a"}'>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
     <title>TIMER PLUS PRO - GYM EDITION (고출력 체육관 타이머)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
