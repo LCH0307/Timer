@@ -1,89 +1,50 @@
 <!DOCTYPE html>
-<html lang="ko" class="dark">
+<html lang="ko">
 <head>
-    <!-- 완벽한 어플(Standalone) 모드 실행을 위한 PWA 설정 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Timer Plus</title>
+
+    <!-- 정식 PWA 어플 설정 (manifest.json 및 아이콘 연결) -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0F172A">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#1a1a1a">
-    <link rel="manifest" href='data:application/manifest+json;charset=utf-8,{"name":"Timer Plus Pro","short_name":"TimerPro","display":"standalone","background_color":"#1a1a1a","theme_color":"#1a1a1a"}'>
-    
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-title" content="Timer Plus">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="apple-touch-icon" href="icon.png">
 
-    <title>TIMER PLUS PRO - GYM EDITION (고출력 체육관 타이머)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Black Han Sans, Inter & JetBrains Mono for extreme distance legibility -->
+
+    <!-- Google Fonts: 깔끔하고 가독성 높은 폰트 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Inter:wght@500;700;800;900&family=JetBrains+Mono:wght@800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                        display: ['Black Han Sans', 'Inter', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
 
     <style>
         * {
             -webkit-tap-highlight-color: transparent;
             user-select: none;
+            box-sizing: border-box;
         }
         body {
-            background-color: #060911;
-            color: #F8FAFC;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #0F172A;
+            color: #FFFFFF;
             overflow-x: hidden;
-            transition: background-color 0.25s ease, color 0.2s ease;
+            transition: background-color 0.3s ease;
         }
-        .tabular-nums {
+        .clock-digits {
+            font-family: 'JetBrains Mono', monospace;
             font-variant-numeric: tabular-nums;
-            font-feature-settings: "tnum" 1, "zero" 1;
-        }
-        /* Ultra-Giant Gym Distance Clock Font */
-        .gym-mega-clock {
-            font-size: clamp(5.75rem, 27vw, 17.5rem);
-            line-height: 0.92;
+            font-size: clamp(5.5rem, 26vw, 14rem);
+            line-height: 1;
             letter-spacing: -0.04em;
-        }
-        /* Screen Strobe Flash Effect for noisy gyms */
-        @keyframes strobe-flash {
-            0% { opacity: 0.95; }
-            100% { opacity: 0; }
-        }
-        .strobe-active {
-            animation: strobe-flash 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        /* Warning Pulse Animation for Final 10s Spurt */
-        @keyframes spurt-pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.03); }
-        }
-        .spurt- pulse-anim {
-            animation: spurt-pulse 0.5s infinite ease-in-out;
-        }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.6);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #475569;
-            border-radius: 9999px;
         }
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
@@ -92,1477 +53,854 @@
         }
     </style>
 </head>
-<body id="appBody" class="min-h-screen flex flex-col justify-between relative selection:bg-emerald-500 selection:text-black">
+<body id="appBody" class="min-h-[100dvh] flex flex-col justify-between">
 
-    <!-- Full-Screen Strobe Flash Overlay (Visual Cue for Noisy Gyms) -->
-    <div id="strobeOverlay" class="fixed inset-0 pointer-events-none z-50 bg-white opacity-0"></div>
-
-    <!-- ======================= TOP HEADER BAR ======================= -->
-    <header id="appHeader" class="relative z-20 w-full max-w-5xl mx-auto px-3 sm:px-6 pt-3 pb-2 flex items-center justify-between border-b border-white/15 backdrop-blur-md bg-black/30">
-        <div class="flex items-center gap-2.5 min-w-0">
-            <div class="w-10 h-10 rounded-xl bg-emerald-500 text-slate-950 font-black flex items-center justify-center shadow-lg shrink-0">
-                <i class="fa-solid fa-dumbbell text-lg"></i>
+    <!-- 상단 심플 바 -->
+    <header class="w-full max-w-xl mx-auto px-5 pt-4 pb-2 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center">
+                <i class="fa-solid fa-stopwatch text-teal-300 text-lg"></i>
             </div>
-            <div class="min-w-0">
-                <div class="flex items-center gap-1.5">
-                    <h1 class="font-black text-sm sm:text-base tracking-tight text-white truncate">TIMER PLUS PRO</h1>
-                    <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 uppercase shrink-0">GYM 300%</span>
-                </div>
-                <p id="activePresetHeader" class="text-xs text-white/80 font-bold truncate">복싱 스파링 3분 × 5R</p>
+            <div>
+                <h1 id="routineTitleHeader" class="font-extrabold text-base tracking-tight text-white">타바타 (20초 운동 / 10초 휴식)</h1>
             </div>
         </div>
 
-        <!-- Quick Action & Audio Controls -->
-        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            <!-- Wake Lock Indicator -->
-            <button onclick="requestWakeLock()" id="wakeLockBadge" title="화면 꺼짐 방지 상태" class="hidden md:flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-black/50 border border-white/20 text-xs font-bold text-emerald-300">
-                <i class="fa-solid fa-bolt text-amber-400"></i>
-                <span id="wakeLockText">화면유지 ON</span>
-            </button>
-
-            <!-- High-Contrast Full Background Color Mode Toggle -->
-            <button id="bgModeBtn" onclick="toggleHighContrastBg()" class="px-2.5 py-2 rounded-xl bg-black/60 hover:bg-black/80 text-white border border-white/25 font-extrabold text-xs flex items-center gap-1.5 transition active:scale-95" title="배경 전체 컬러 반전 모드 (원거리 시인성 극대화)">
-                <i class="fa-solid fa-eye text-amber-400"></i>
-                <span id="bgModeLabel" class="hidden sm:inline">배경반전 ON</span>
-            </button>
-
-            <!-- Fullscreen Button -->
-            <button onclick="toggleFullScreen()" class="p-2.5 rounded-xl bg-black/60 hover:bg-black/80 text-white border border-white/25 transition active:scale-95" title="전체화면 전환">
-                <i id="fullscreenIcon" class="fa-solid fa-expand text-sm w-4 text-center"></i>
-            </button>
-
-            <!-- Mute Toggle -->
-            <button id="soundToggleBtn" onclick="toggleMute()" class="p-2.5 rounded-xl bg-black/60 hover:bg-black/80 text-white border border-white/25 transition active:scale-95" title="음소거 켜기/끄기">
-                <i id="soundToggleIcon" class="fa-solid fa-volume-high text-emerald-400 text-sm w-4 text-center"></i>
-            </button>
-
-            <!-- Turbo Audio Settings Modal Button -->
-            <button onclick="openAudioModal()" class="px-3 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg transition active:scale-95" title="체육관 고출력 사운드 설정">
-                <i class="fa-solid fa-bullhorn"></i>
-                <span>음량증폭</span>
+        <div class="flex items-center gap-2">
+            <!-- 소리 켜기/끄기 버튼 -->
+            <button onclick="toggleMute()" class="w-10 h-10 rounded-xl bg-black/25 hover:bg-black/40 flex items-center justify-center text-white transition active:scale-95" title="소리 켜기/끄기">
+                <i id="muteIcon" class="fa-solid fa-volume-high text-base"></i>
             </button>
         </div>
     </header>
 
-    <!-- ======================= INSTANT SOUND TEST BAR (GYM CHECK) ======================= -->
-    <div id="quickSoundBar" class="relative z-20 w-full max-w-5xl mx-auto px-3 sm:px-6 pt-2">
-        <div class="bg-black/55 border border-white/15 rounded-xl px-3 py-1.5 flex flex-wrap items-center justify-between gap-2 text-xs">
-            <div class="flex items-center gap-2 font-extrabold text-white/90">
-                <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                <span>체육관 고출력 알림음 즉시 테스트:</span>
-                <span id="currentSoundProfileBadge" class="px-2 py-0.5 rounded bg-white/15 text-amber-300 font-black">대형 복싱 공 + 딱딱이</span>
+    <!-- 메인 영역 -->
+    <main class="flex-1 w-full max-w-xl mx-auto px-5 py-2 flex flex-col justify-between">
+
+        <!-- ================= 1. 타이머 탭 ================= -->
+        <section id="tab-timer" class="flex-1 flex flex-col justify-between py-2">
+            
+            <!-- 현재 상태 배지 및 다음 구간 안내 -->
+            <div class="text-center space-y-1.5 mt-2">
+                <div id="phaseBadge" class="inline-block px-4 py-1 rounded-full bg-black/25 text-white font-extrabold text-sm tracking-widest uppercase">
+                    준비 (PREPARE)
+                </div>
+                <div id="nextUpText" class="text-sm font-bold text-white/80">
+                    다음: 운동 00:20
+                </div>
             </div>
-            <div class="flex items-center gap-1.5">
-                <button onclick="testSound('work')" class="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black transition active:scale-95">
-                    🔔 시작 공소리
+
+            <!-- 중앙 초대형 타이머 숫자 -->
+            <div class="my-auto py-6 flex flex-col items-center justify-center">
+                <div id="timeDisplay" class="clock-digits font-extrabold text-white drop-shadow-md">
+                    00:10
+                </div>
+
+                <!-- 심플 진행 바 -->
+                <div class="w-full h-3 bg-black/25 rounded-full overflow-hidden mt-6">
+                    <div id="progressBar" class="h-full bg-white rounded-full transition-all duration-150" style="width: 100%;"></div>
+                </div>
+
+                <div class="w-full flex justify-between text-xs font-bold text-white/80 mt-2">
+                    <span>전체 남은 시간</span>
+                    <span id="totalRemainText" class="font-mono text-sm">04:00</span>
+                </div>
+            </div>
+
+            <!-- 사이클(반복) 및 세트 표시 -->
+            <div class="grid grid-cols-2 gap-3 mb-5">
+                <div class="bg-black/25 backdrop-blur-sm rounded-2xl p-4 text-center">
+                    <div class="text-xs font-bold text-white/75 uppercase mb-1">사이클 (반복)</div>
+                    <div class="font-mono font-extrabold text-3xl text-white">
+                        <span id="cycleCurrent">1</span><span class="text-white/50 text-xl"> / </span><span id="cycleTotal">8</span>
+                    </div>
+                </div>
+                <div class="bg-black/25 backdrop-blur-sm rounded-2xl p-4 text-center">
+                    <div class="text-xs font-bold text-white/75 uppercase mb-1">세트 (SETS)</div>
+                    <div class="font-mono font-extrabold text-3xl text-white">
+                        <span id="setCurrent">1</span><span class="text-white/50 text-xl"> / </span><span id="setTotal">1</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 하단 조작 버튼 (초기화 / 시작·일시정지 / 다음 구간) -->
+            <div class="flex items-center gap-3">
+                <button onclick="resetTimer()" class="w-16 h-16 rounded-2xl bg-black/30 hover:bg-black/40 text-white font-bold flex flex-col items-center justify-center gap-1 transition active:scale-95">
+                    <i class="fa-solid fa-rotate-left text-lg"></i>
+                    <span class="text-[11px]">초기화</span>
                 </button>
-                <button onclick="testSound('spurt')" class="px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-black transition active:scale-95">
-                    🥢 10초전 딱딱이
+
+                <button id="startPauseBtn" onclick="toggleStartPause()" class="flex-1 h-16 rounded-2xl bg-white text-slate-900 font-black text-xl flex items-center justify-center gap-2.5 shadow-lg transition active:scale-95">
+                    <i id="startPauseIcon" class="fa-solid fa-play"></i>
+                    <span id="startPauseLabel">시작</span>
                 </button>
-                <button onclick="testSound('whistle')" class="px-2.5 py-1 rounded-lg bg-sky-400 hover:bg-sky-300 text-slate-950 font-black transition active:scale-95">
-                    📣 심판 호루라기
+
+                <button onclick="skipNextPhase()" class="w-16 h-16 rounded-2xl bg-black/30 hover:bg-black/40 text-white font-bold flex flex-col items-center justify-center gap-1 transition active:scale-95">
+                    <i class="fa-solid fa-forward-step text-lg"></i>
+                    <span class="text-[11px]">다음</span>
                 </button>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <!-- ======================= MAIN CONTENT CONTAINER ======================= -->
-    <main class="relative z-10 flex-1 w-full max-w-5xl mx-auto px-3 sm:px-6 py-2 flex flex-col justify-between">
+        <!-- ================= 2. 시간 설정 탭 ================= -->
+        <section id="tab-setup" class="hidden flex-1 flex-col justify-between py-2 space-y-4">
+            <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h2 class="font-extrabold text-base text-white">시간 및 세트 설정</h2>
+                    <div class="text-xs font-bold text-slate-400">
+                        총 시간: <span id="setupTotalTime" class="text-teal-400 font-mono text-sm font-extrabold">04:00</span>
+                    </div>
+                </div>
 
-        <!-- ======================= 1. ACTIVE GYM TIMER TAB ======================= -->
-        <section id="tab-timer" class="flex-1 flex flex-col justify-between space-y-2 sm:space-y-3">
+                <!-- 루틴 이름 입력 -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1.5">루틴 이름</label>
+                    <input id="routineNameInput" type="text" value="타바타 (20초 운동 / 10초 휴식)" placeholder="예: 복싱 3분 5라운드"
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-bold text-white focus:outline-none focus:border-teal-400">
+                </div>
 
-            <!-- Giant Phase Banner & Next Phase Indicator -->
-            <div id="phaseHeaderCard" class="bg-black/55 border-2 border-white/25 rounded-2xl px-4 py-3 flex items-center justify-between shadow-2xl">
-                <div class="flex items-center gap-3">
-                    <span id="phaseDot" class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-amber-400 animate-ping shrink-0"></span>
-                    <div>
-                        <div class="text-[11px] sm:text-xs uppercase tracking-widest text-white/75 font-extrabold">현재 상태 (CURRENT PHASE)</div>
-                        <div id="phaseTitle" class="text-2xl sm:text-4xl font-black tracking-tight text-white drop-shadow">
-                            준비 (PREPARE)
+                <!-- 세부 설정 항목들 -->
+                <div class="space-y-2.5">
+                    <!-- 준비 시간 -->
+                    <div class="flex items-center justify-between bg-slate-950 p-3 rounded-2xl border border-slate-800/80">
+                        <div>
+                            <div class="text-sm font-bold text-amber-400">준비 시간</div>
+                            <div class="text-[11px] text-slate-400">운동 시작 전 카운트다운</div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="stepTime('prepare', -5)" class="w-9 h-9 rounded-xl bg-slate-800 text-white font-bold text-xs">-5초</button>
+                            <div class="flex items-center bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 font-mono text-sm font-bold">
+                                <input id="prepMin" type="number" min="0" max="59" value="0" onchange="updateSetupPreview()" class="w-7 text-center bg-transparent focus:outline-none">
+                                <span>:</span>
+                                <input id="prepSec" type="number" min="0" max="59" value="10" onchange="updateSetupPreview()" class="w-7 text-center bg-transparent focus:outline-none">
+                            </div>
+                            <button onclick="stepTime('prepare', 5)" class="w-9 h-9 rounded-xl bg-slate-800 text-white font-bold text-xs">+5초</button>
+                        </div>
+                    </div>
+
+                    <!-- 운동 시간 -->
+                    <div class="flex items-center justify-between bg-slate-950 p-3 rounded-2xl border border-slate-800/80">
+                        <div>
+                            <div class="text-sm font-bold text-emerald-400">운동 시간</div>
+                            <div class="text-[11px] text-slate-400">1사이클당 운동 시간</div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="stepTime('work', -5)" class="w-9 h-9 rounded-xl bg-slate-800 text-white font-bold text-xs">-5초</button>
+                            <div class="flex items-center bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 font-mono text-sm font-bold">
+                                <input id="workMin" type="number" min="0" max="59" value="0" onchange="updateSetupPreview()" class="w-7 text-center bg-transparent focus:outline-none">
+                                <span>:</span>
+                                <input id="workSec" type="number" min="0" max="59" value="20" onchange="updateSetupPreview()" class="w-7 text-center bg-transparent focus:outline-none">
+                            </div>
+                            <button onclick="stepTime('work', 5)" class="w-9 h-9 rounded-xl bg-slate-800 text-white font-bold text-xs">+5초</button>
+                        </div>
+                    </div>
+
+                    <!-- 휴식 시간 -->
+                    <div class="flex items-center justify-between bg-slate-950 p-3 rounded-2xl border border-slate-800/80">
+                        <div>
+                            <div class="text-sm font-bold text-rose-400">휴식 시간</div>
+                            <div class="text-[11px] text-slate-400">운동 후 쉬는 시간</div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="stepTime('rest', -5)" class="w-9 h-9 rounded-xl bg-slate-800 text-white font-bold text-xs">-5초</button>
+                            <div class="flex items-center bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 font-mono text-sm font-bold">
+                                <input id="restMin" type="number" min="0" max="59" value="0" onchange="updateSetupPreview()" class="w-7 text-center bg-transparent focus:outline-none">
+                                <span>:</span>
+                                <input id="restSec" type="number" min="0" max="59" value="10" onchange="updateSetupPreview()" class="w-7 text-center bg-transparent focus:outline-none">
+                            </div>
+                            <button onclick="stepTime('rest', 5)" class="w-9 h-9 rounded-xl bg-slate-800 text-white font-bold text-xs">+5초</button>
+                        </div>
+                    </div>
+
+                    <!-- 사이클(반복) 및 세트 수 -->
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800/80 flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-bold text-white">사이클</div>
+                                <div class="text-[10px] text-slate-400">반복 횟수</div>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button onclick="stepCount('cyclesInput', -1)" class="w-8 h-8 rounded-lg bg-slate-800 text-white font-bold">-</button>
+                                <input id="cyclesInput" type="number" min="1" max="99" value="8" onchange="updateSetupPreview()" class="w-9 text-center bg-transparent font-mono font-bold text-base focus:outline-none">
+                                <button onclick="stepCount('cyclesInput', 1)" class="w-8 h-8 rounded-lg bg-slate-800 text-white font-bold">+</button>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800/80 flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-bold text-white">세트 수</div>
+                                <div class="text-[10px] text-slate-400">사이클 묶음</div>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button onclick="stepCount('setsInput', -1)" class="w-8 h-8 rounded-lg bg-slate-800 text-white font-bold">-</button>
+                                <input id="setsInput" type="number" min="1" max="50" value="1" onchange="updateSetupPreview()" class="w-9 text-center bg-transparent font-mono font-bold text-base focus:outline-none">
+                                <button onclick="stepCount('setsInput', 1)" class="w-8 h-8 rounded-lg bg-slate-800 text-white font-bold">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 세트 간 휴식 시간 -->
+                    <div class="flex items-center justify-between bg-slate-950 p-3 rounded-2xl border border-slate-800/80">
+                        <div>
+                            <div class="text-sm font-bold text-sky-400">세트 간 휴식</div>
+                            <div class="text-[11px] text-slate-400">1세트 종료 후 긴 휴식</div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="stepTime('setrest', -10)" class="w-9 h-9 rounded-xl bg-slate-800 text-white font-bold text-xs">-10초</button>
+                            <div class="flex items-center bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 font-mono text-sm font-bold">
+                                <input id="setRestMin" type="number" min="0" max="59" value="1" onchange="updateSetupPreview()" class="w-7 text-center bg-transparent focus:outline-none">
+                                <span>:</span>
+                                <input id="setRestSec" type="number" min="0" max="59" value="0" onchange="updateSetupPreview()" class="w-7 text-center bg-transparent focus:outline-none">
+                            </div>
+                            <button onclick="stepTime('setrest', 10)" class="w-9 h-9 rounded-xl bg-slate-800 text-white font-bold text-xs">+10초</button>
                         </div>
                     </div>
                 </div>
 
-                <div class="text-right">
-                    <div class="text-[11px] sm:text-xs uppercase tracking-widest text-white/75 font-extrabold">다음 구간 (NEXT UP)</div>
-                    <div id="nextPhaseLabel" class="text-base sm:text-2xl font-black text-amber-300 tabular-nums">
-                        운동 03:00
-                    </div>
+                <!-- 저장 및 적용 버튼 -->
+                <div class="grid grid-cols-2 gap-2.5 pt-2">
+                    <button onclick="saveRoutine()" class="py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-sm flex items-center justify-center gap-2 transition active:scale-95">
+                        <i class="fa-solid fa-bookmark text-teal-400"></i> 루틴 저장
+                    </button>
+                    <button onclick="applySetupToTimer()" class="py-3.5 rounded-2xl bg-teal-400 hover:bg-teal-300 text-slate-950 font-black text-sm flex items-center justify-center gap-2 transition active:scale-95">
+                        <i class="fa-solid fa-check"></i> 타이머에 적용
+                    </button>
                 </div>
             </div>
+        </section>
 
-            <!-- MEGA DISTANCE DISPLAY (Tappable in Glove Mode) -->
-            <div id="gloveTouchZone" onclick="handleGloveZoneTap()" class="relative flex-1 flex flex-col items-center justify-center rounded-3xl bg-black/45 border-2 border-white/25 px-2 py-4 sm:py-6 shadow-2xl cursor-pointer transition active:scale-[0.995] overflow-hidden">
+        <!-- ================= 3. 내 루틴 & 사운드 탭 ================= -->
+        <section id="tab-routines" class="hidden flex-1 flex-col justify-between py-2 space-y-4">
+            
+            <!-- 저장된 루틴 목록 -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 space-y-3 shadow-xl">
+                <h2 class="font-extrabold text-base text-white">저장된 운동 루틴</h2>
+                <div id="savedRoutinesList" class="space-y-2.5 max-h-60 overflow-y-auto pr-1"></div>
+            </div>
 
-                <!-- Top Badge inside Mega Zone: Spurt Warning / Glove Mode Indicator -->
-                <div class="w-full px-4 flex items-center justify-between text-xs sm:text-sm font-black">
-                    <span id="phaseSubTag" class="px-3 py-1 rounded-full bg-white/15 text-white border border-white/25 uppercase tracking-wider">
-                        ROUND 1 / 5
-                    </span>
-                    <button onclick="event.stopPropagation(); toggleGloveTouchLock();" id="gloveModeBadge" class="px-3 py-1 rounded-full bg-white/15 hover:bg-white/25 text-white border border-white/25 flex items-center gap-1.5 transition">
-                        <i id="gloveLockIcon" class="fa-solid fa-hand-fist text-amber-300"></i>
-                        <span id="gloveLockText">화면터치 일시정지 ON</span>
+            <!-- 깔끔한 사운드 설정 -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl">
+                <div class="flex items-center justify-between">
+                    <h2 class="font-extrabold text-base text-white">알림음 설정</h2>
+                    <button onclick="previewCurrentSound()" class="px-3 py-1.5 rounded-xl bg-teal-400/20 text-teal-300 font-bold text-xs hover:bg-teal-400/30 transition">
+                        <i class="fa-solid fa-play mr-1"></i> 소리 들어보기
                     </button>
                 </div>
 
-                <!-- ULTRA GIANT CLOCK NUMBERS -->
-                <div id="mainTimeDisplay" class="gym-mega-clock font-mono font-extrabold text-white tabular-nums tracking-tighter select-none my-2 drop-shadow-[0_8px_30px_rgba(0,0,0,0.85)]">
-                    03:00
+                <!-- 소리 종류 선택 (귀가 편안하고 크고 맑은 사운드) -->
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="soundBtn-bell" onclick="selectSoundType('bell')" class="p-3 rounded-2xl border-2 border-teal-400 bg-teal-400/15 text-white font-bold text-xs text-center">
+                        🔔 맑은 복싱 벨 (추천)
+                    </button>
+                    <button id="soundBtn-chime" onclick="selectSoundType('chime')" class="p-3 rounded-2xl border border-slate-800 bg-slate-950 text-slate-300 font-bold text-xs text-center">
+                        🎵 스포츠 차임 비프
+                    </button>
                 </div>
 
-                <!-- Thick Full-Width Distance Progress Bar -->
-                <div class="w-full max-w-4xl px-4 mt-1">
-                    <div class="w-full h-7 sm:h-9 bg-black/70 rounded-2xl p-1 border border-white/30 overflow-hidden shadow-inner">
-                        <div id="giantProgressBar" class="h-full bg-amber-400 rounded-xl transition-all duration-150" style="width: 100%;"></div>
+                <!-- 음량 슬라이더 -->
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs font-bold text-slate-300">
+                        <span>알림음 크기 (음질 왜곡 없는 최대 증폭)</span>
+                        <span id="volValueText" class="text-teal-400 font-mono">100%</span>
                     </div>
+                    <input id="volumeRange" type="range" min="20" max="100" step="5" value="100" oninput="updateVolume(this.value)" class="w-full accent-teal-400 cursor-pointer">
                 </div>
 
-                <!-- Remaining Total Workout Time & Spurt Notice -->
-                <div class="w-full px-4 mt-2.5 flex items-center justify-between text-xs sm:text-base font-extrabold text-white/90">
-                    <div class="flex items-center gap-1.5">
-                        <i class="fa-solid fa-clock text-white/70"></i>
-                        <span>전체 남은 시간:</span>
-                        <span id="totalRemainingDisplay" class="font-mono text-lg sm:text-xl text-white tabular-nums">19:10</span>
-                    </div>
-                    <div id="spurtAlertBanner" class="hidden items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black animate-bounce">
-                        <i class="fa-solid fa-fire"></i>
-                        <span>라스트 스퍼트!</span>
-                    </div>
-                    <div id="normalProgressPct" class="font-mono text-base sm:text-xl text-emerald-300 tabular-nums">
-                        진행률 <span id="overallPercentDisplay">0%</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- High-Visibility Round (Cycle) & Set Cards -->
-            <div class="grid grid-cols-2 gap-2.5 sm:gap-4">
-                <div class="bg-black/60 border-2 border-white/20 rounded-2xl px-4 py-2.5 sm:py-3 flex items-center justify-between">
+                <!-- 한국어 음성 안내 스위치 -->
+                <label class="flex items-center justify-between bg-slate-950 p-3 rounded-2xl border border-slate-800 cursor-pointer">
                     <div>
-                        <div class="text-xs sm:text-sm font-black text-white/75 uppercase">라운드 / 사이클</div>
-                        <div class="text-[11px] text-white/60 font-semibold hidden sm:block">1세트 내 반복 횟수</div>
+                        <div class="text-sm font-bold text-white">한국어 음성 안내 함께 듣기</div>
+                        <div class="text-[11px] text-slate-400">"운동 시작", "휴식" 음성 출력</div>
                     </div>
-                    <div class="font-mono font-black text-3xl sm:text-5xl text-white tabular-nums">
-                        <span id="currentCycleNum" class="text-amber-300">1</span><span class="text-white/40 text-2xl sm:text-3xl">/</span><span id="totalCycleNum">5</span>
-                    </div>
+                    <input id="voiceToggle" type="checkbox" checked onchange="toggleVoice(this.checked)" class="w-5 h-5 accent-teal-400">
+                </label>
+
+                <!-- 에메랄드 아이콘 PNG 변환 다운로드 버튼 (아이폰/갤럭시 겸용) -->
+                <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
+                    <div class="text-xs text-slate-400 font-semibold">어플 아이콘 이미지 파일(`icon.png`)</div>
+                    <button onclick="downloadEmeraldIconPNG()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-teal-300 font-bold text-xs">
+                        <i class="fa-solid fa-download mr-1"></i> icon.png 다운로드
+                    </button>
                 </div>
-
-                <div class="bg-black/60 border-2 border-white/20 rounded-2xl px-4 py-2.5 sm:py-3 flex items-center justify-between">
-                    <div>
-                        <div class="text-xs sm:text-sm font-black text-white/75 uppercase">세트 (SETS)</div>
-                        <div class="text-[11px] text-white/60 font-semibold hidden sm:block">전체 사이클 묶음</div>
-                    </div>
-                    <div class="font-mono font-black text-3xl sm:text-5xl text-white tabular-nums">
-                        <span id="currentSetNum" class="text-emerald-300">1</span><span class="text-white/40 text-2xl sm:text-3xl">/</span><span id="totalSetNum">1</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Glove-Friendly Giant Control Buttons -->
-            <div class="pt-1 pb-1 flex items-center justify-center gap-2.5 sm:gap-4">
-                <!-- Reset Button -->
-                <button onclick="resetTimer()" class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-black/70 hover:bg-black/90 border-2 border-white/25 text-white flex flex-col items-center justify-center transition active:scale-95 shadow-xl" title="처음으로 초기화">
-                    <i class="fa-solid fa-rotate-left text-lg sm:text-xl"></i>
-                    <span class="text-[10px] font-extrabold mt-0.5">초기화</span>
-                </button>
-
-                <!-- Previous Phase -->
-                <button onclick="skipPhase(-1)" class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-black/70 hover:bg-black/90 border-2 border-white/25 text-white flex flex-col items-center justify-center transition active:scale-95 shadow-xl" title="이전 구간">
-                    <i class="fa-solid fa-backward-step text-lg sm:text-xl"></i>
-                    <span class="text-[10px] font-extrabold mt-0.5">이전</span>
-                </button>
-
-                <!-- Giant Primary Start / Pause Button -->
-                <button id="startPauseBtn" onclick="toggleTimer()" class="flex-1 max-w-xs h-14 sm:h-16 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 border-2 border-white font-black text-xl sm:text-2xl tracking-tight flex items-center justify-center gap-3 shadow-2xl transition active:scale-95">
-                    <i id="startPauseIcon" class="fa-solid fa-play text-2xl"></i>
-                    <span id="startPauseText">운동 시작</span>
-                </button>
-
-                <!-- Next Phase -->
-                <button onclick="skipPhase(1)" class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-black/70 hover:bg-black/90 border-2 border-white/25 text-white flex flex-col items-center justify-center transition active:scale-95 shadow-xl" title="다음 구간으로 건너뛰기">
-                    <i class="fa-solid fa-forward-step text-lg sm:text-xl"></i>
-                    <span class="text-[10px] font-extrabold mt-0.5">다음</span>
-                </button>
-            </div>
-        </section>
-
-        <!-- ======================= 2. TIMER SETUP TAB ======================= -->
-        <section id="tab-setup" class="hidden flex-1 flex-col justify-between space-y-4 pb-4">
-            <div class="bg-slate-900/95 border border-slate-700 rounded-2xl p-4 sm:p-5 space-y-4 shadow-2xl">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                    <div>
-                        <h2 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
-                            <i class="fa-solid fa-sliders text-emerald-400"></i> 타이머 시간 및 라운드 설정
-                        </h2>
-                        <p class="text-xs text-slate-400">운동시간, 휴식시간, 사이클(라운드), 세트, 스퍼트 알림을 설정하세요.</p>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-[11px] text-slate-400 font-bold block">총 운동 소요 시간</span>
-                        <span id="setupTotalDuration" class="font-mono font-black text-xl text-emerald-400">19:10</span>
-                    </div>
-                </div>
-
-                <!-- Preset Title & Save Button -->
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-300 mb-1.5">루틴 이름 (저장 후 언제든 불러오기 가능)</label>
-                    <div class="flex gap-2">
-                        <input id="inputPresetName" type="text" placeholder="예: 복싱 스파링 3분 5R, 고강도 서킷" value="복싱 스파링 3분 × 5R"
-                            class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-bold text-white focus:outline-none focus:border-emerald-400">
-                        <button onclick="saveCurrentAsPreset()" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-lg transition active:scale-95 whitespace-nowrap">
-                            <i class="fa-solid fa-floppy-disk"></i> 루틴 저장
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Configuration Rows -->
-                <div class="space-y-2.5">
-
-                    <!-- 1. Prepare Time -->
-                    <div class="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-slate-950 border border-amber-500/30">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-9 h-9 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
-                                <i class="fa-solid fa-hourglass-start"></i>
-                            </span>
-                            <div>
-                                <div class="text-sm font-extrabold text-white">준비 시간 (PREPARE)</div>
-                                <div class="text-[11px] text-slate-400">글러브 착용 및 시작 전 카운트다운</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-1.5 ml-auto">
-                            <button onclick="adjustTime('prepare', -5)" class="px-2.5 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">-5초</button>
-                            <div class="flex items-center bg-slate-900 border border-amber-500/40 rounded-lg px-2 py-1 font-mono text-base font-black text-amber-300">
-                                <input id="prepMin" type="number" min="0" max="59" value="0" onchange="onSetupChange()" class="w-8 text-center bg-transparent focus:outline-none">
-                                <span class="text-slate-500">:</span>
-                                <input id="prepSec" type="number" min="0" max="59" value="10" onchange="onSetupChange()" class="w-8 text-center bg-transparent focus:outline-none">
-                            </div>
-                            <button onclick="adjustTime('prepare', 5)" class="px-2.5 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">+5초</button>
-                        </div>
-                    </div>
-
-                    <!-- 2. Work Time -->
-                    <div class="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-slate-950 border border-emerald-500/40">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-9 h-9 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
-                                <i class="fa-solid fa-fire-flame-curved"></i>
-                            </span>
-                            <div>
-                                <div class="text-sm font-extrabold text-white">운동 시간 (WORK)</div>
-                                <div class="text-[11px] text-slate-400">본 운동 집중 구간</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-1.5 ml-auto">
-                            <button onclick="adjustTime('work', -10)" class="px-2 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">-10초</button>
-                            <button onclick="adjustTime('work', -5)" class="px-2 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">-5초</button>
-                            <div class="flex items-center bg-slate-900 border border-emerald-500/50 rounded-lg px-2 py-1 font-mono text-base font-black text-emerald-300">
-                                <input id="workMin" type="number" min="0" max="59" value="3" onchange="onSetupChange()" class="w-8 text-center bg-transparent focus:outline-none">
-                                <span class="text-slate-500">:</span>
-                                <input id="workSec" type="number" min="0" max="59" value="0" onchange="onSetupChange()" class="w-8 text-center bg-transparent focus:outline-none">
-                            </div>
-                            <button onclick="adjustTime('work', 5)" class="px-2 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">+5초</button>
-                            <button onclick="adjustTime('work', 30)" class="px-2 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">+30초</button>
-                        </div>
-                    </div>
-
-                    <!-- 3. Rest Time -->
-                    <div class="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-slate-950 border border-red-500/40">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-9 h-9 rounded-lg bg-red-500/20 text-red-400 flex items-center justify-center font-bold">
-                                <i class="fa-solid fa-wind"></i>
-                            </span>
-                            <div>
-                                <div class="text-sm font-extrabold text-white">휴식 시간 (REST)</div>
-                                <div class="text-[11px] text-slate-400">사이클(라운드) 사이 휴식</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-1.5 ml-auto">
-                            <button onclick="adjustTime('rest', -10)" class="px-2 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">-10초</button>
-                            <button onclick="adjustTime('rest', -5)" class="px-2 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">-5초</button>
-                            <div class="flex items-center bg-slate-900 border border-red-500/50 rounded-lg px-2 py-1 font-mono text-base font-black text-red-300">
-                                <input id="restMin" type="number" min="0" max="59" value="1" onchange="onSetupChange()" class="w-8 text-center bg-transparent focus:outline-none">
-                                <span class="text-slate-500">:</span>
-                                <input id="restSec" type="number" min="0" max="59" value="0" onchange="onSetupChange()" class="w-8 text-center bg-transparent focus:outline-none">
-                            </div>
-                            <button onclick="adjustTime('rest', 5)" class="px-2 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">+5초</button>
-                            <button onclick="adjustTime('rest', 10)" class="px-2 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">+10초</button>
-                        </div>
-                    </div>
-
-                    <!-- 4. Cycles & 5. Sets Grid -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        <!-- Cycles -->
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
-                            <div>
-                                <div class="text-sm font-extrabold text-white">사이클 (라운드 수)</div>
-                                <div class="text-[11px] text-slate-400">1세트당 [운동+휴식] 반복</div>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <button onclick="adjustCount('cycles', -1)" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-black">-</button>
-                                <input id="cyclesInput" type="number" min="1" max="99" value="5" onchange="onSetupChange()"
-                                    class="w-12 text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 font-mono text-base font-black text-amber-300 focus:outline-none">
-                                <button onclick="adjustCount('cycles', 1)" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-black">+</button>
-                            </div>
-                        </div>
-
-                        <!-- Sets -->
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
-                            <div>
-                                <div class="text-sm font-extrabold text-white">세트 수 (SETS)</div>
-                                <div class="text-[11px] text-slate-400">전체 사이클 묶음 반복</div>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <button onclick="adjustCount('sets', -1)" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-black">-</button>
-                                <input id="setsInput" type="number" min="1" max="50" value="1" onchange="onSetupChange()"
-                                    class="w-12 text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 font-mono text-base font-black text-emerald-300 focus:outline-none">
-                                <button onclick="adjustCount('sets', 1)" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-black">+</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 6. Set Rest & 7. Cooldown -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-violet-500/30">
-                            <div>
-                                <div class="text-sm font-extrabold text-white">세트 간 긴 휴식</div>
-                                <div class="text-[11px] text-slate-400">세트 종료 후 재정비 시간</div>
-                            </div>
-                            <div class="flex items-center gap-1">
-                                <button onclick="adjustTime('setrest', -10)" class="px-2 h-8 rounded bg-slate-800 text-xs font-bold">-10</button>
-                                <div class="flex items-center bg-slate-900 border border-violet-500/40 rounded px-1.5 py-1 font-mono text-sm font-black text-violet-300">
-                                    <input id="setRestMin" type="number" min="0" max="59" value="1" onchange="onSetupChange()" class="w-6 text-center bg-transparent">
-                                    <span>:</span>
-                                    <input id="setRestSec" type="number" min="0" max="59" value="0" onchange="onSetupChange()" class="w-6 text-center bg-transparent">
-                                </div>
-                                <button onclick="adjustTime('setrest', 10)" class="px-2 h-8 rounded bg-slate-800 text-xs font-bold">+10</button>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-teal-500/30">
-                            <div>
-                                <div class="text-sm font-extrabold text-white">마무리 쿨다운</div>
-                                <div class="text-[11px] text-slate-400">전체 종료 후 호흡정리</div>
-                            </div>
-                            <div class="flex items-center gap-1">
-                                <button onclick="adjustTime('cooldown', -10)" class="px-2 h-8 rounded bg-slate-800 text-xs font-bold">-10</button>
-                                <div class="flex items-center bg-slate-900 border border-teal-500/40 rounded px-1.5 py-1 font-mono text-sm font-black text-teal-300">
-                                    <input id="coolMin" type="number" min="0" max="59" value="0" onchange="onSetupChange()" class="w-6 text-center bg-transparent">
-                                    <span>:</span>
-                                    <input id="coolSec" type="number" min="0" max="59" value="0" onchange="onSetupChange()" class="w-6 text-center bg-transparent">
-                                </div>
-                                <button onclick="adjustTime('cooldown', 10)" class="px-2 h-8 rounded bg-slate-800 text-xs font-bold">+10</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 8. Boxing Gym Spurt Warning (10s Wood Clapper) & Halfway Alert -->
-                    <div class="p-3 rounded-xl bg-slate-950 border border-amber-500/30 flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                            <div class="text-sm font-extrabold text-amber-300 flex items-center gap-1.5">
-                                <i class="fa-solid fa-fire"></i> 라운드 종료 전 스퍼트 경고 (복싱 딱딱이 + 주황색 배경 전환)
-                            </div>
-                            <div class="text-[11px] text-slate-400">운동 구간 종료 직전 마지막 힘을 쏟을 수 있도록 강렬한 딱딱이 소리와 함께 화면이 주황색으로 바뀝니다.</div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <select id="spurtWarnSelect" onchange="onSetupChange()" class="bg-slate-900 border border-amber-500/40 rounded-lg px-3 py-1.5 text-xs font-black text-white">
-                                <option value="10" selected>종료 10초 전 딱딱이 경고</option>
-                                <option value="15">종료 15초 전 딱딱이 경고</option>
-                                <option value="30">종료 30초 전 딱딱이 경고</option>
-                                <option value="0">끄기</option>
-                            </select>
-                            <label class="flex items-center gap-1.5 text-xs font-bold text-slate-300 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-lg cursor-pointer">
-                                <input id="halfwayAlertCheck" type="checkbox" onchange="onSetupChange()" class="accent-emerald-400">
-                                <span>절반(50%) 경과 알림</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Apply Button -->
-                <button onclick="applySetupAndSwitchToTimer()" class="w-full py-4 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black text-base sm:text-lg shadow-xl transition active:scale-98 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-check-double"></i> 위 설정으로 타이머 즉시 시작 준비
-                </button>
-            </div>
-        </section>
-
-        <!-- ======================= 3. SAVED PRESETS TAB ======================= -->
-        <section id="tab-presets" class="hidden flex-1 flex-col justify-between space-y-4 pb-4">
-            <div class="bg-slate-900/95 border border-slate-700 rounded-2xl p-4 sm:p-5 space-y-4 flex-1 flex flex-col shadow-2xl">
-                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
-                    <div>
-                        <h2 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
-                            <i class="fa-solid fa-folder-open text-amber-400"></i> 저장된 운동 루틴 보관함
-                        </h2>
-                        <p class="text-xs text-slate-400">저장한 설정은 휴대폰에 영구 보관되며 언제든 원클릭으로 꺼내 쓸 수 있습니다.</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="exportPresetsJSON()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700">
-                            <i class="fa-solid fa-copy mr-1"></i>백업 복사
-                        </button>
-                        <button onclick="switchTab('setup')" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-xs font-black text-slate-950">
-                            + 새 루틴 만들기
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Presets List -->
-                <div id="presetsListContainer" class="space-y-2.5 flex-1 overflow-y-auto pr-1"></div>
             </div>
         </section>
 
     </main>
 
-    <!-- ======================= BOTTOM TAB NAVIGATION ======================= -->
-    <nav class="relative z-20 w-full max-w-5xl mx-auto px-3 sm:px-6 pb-3 pt-1">
-        <div class="grid grid-cols-3 gap-2 bg-black/80 border border-white/20 p-1.5 rounded-2xl shadow-2xl backdrop-blur-md">
-            <button id="navBtn-timer" onclick="switchTab('timer')" class="py-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 bg-white text-slate-950 shadow transition">
-                <i class="fa-solid fa-stopwatch text-base"></i>
-                <span>대형 타이머</span>
+    <!-- 하단 3탭 네비게이션 -->
+    <nav class="w-full max-w-xl mx-auto px-5 pb-5 pt-2">
+        <div class="grid grid-cols-3 gap-1.5 bg-black/35 backdrop-blur-md p-1.5 rounded-2xl">
+            <button id="nav-timer" onclick="switchTab('timer')" class="py-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-1.5 bg-white text-slate-900 shadow">
+                <i class="fa-solid fa-stopwatch"></i> 타이머
             </button>
-            <button id="navBtn-setup" onclick="switchTab('setup')" class="py-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 text-white/75 hover:text-white transition">
-                <i class="fa-solid fa-sliders text-base"></i>
-                <span>시간/세트 설정</span>
+            <button id="nav-setup" onclick="switchTab('setup')" class="py-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-1.5 text-white/75 hover:text-white">
+                <i class="fa-solid fa-sliders"></i> 시간 설정
             </button>
-            <button id="navBtn-presets" onclick="switchTab('presets')" class="py-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 text-white/75 hover:text-white transition">
-                <i class="fa-solid fa-bookmark text-base"></i>
-                <span>저장된 루틴</span>
-                <span id="presetCountBadge" class="px-1.5 py-0.5 text-[10px] rounded-full bg-amber-400 text-slate-950 font-black">4</span>
+            <button id="nav-routines" onclick="switchTab('routines')" class="py-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-1.5 text-white/75 hover:text-white">
+                <i class="fa-solid fa-bookmark"></i> 내 루틴/소리
             </button>
         </div>
     </nav>
 
-    <!-- ======================= TURBO AUDIO BOOSTER MODAL ======================= -->
-    <div id="audioModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-        <div class="w-full max-w-lg bg-slate-900 border-2 border-amber-400/50 rounded-2xl p-5 space-y-4 shadow-2xl">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h3 class="font-black text-base sm:text-lg text-white flex items-center gap-2">
-                    <i class="fa-solid fa-bullhorn text-amber-400"></i> 체육관 소음 관통 300% 사운드 부스터
-                </h3>
-                <button onclick="closeAudioModal()" class="text-slate-400 hover:text-white p-1">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
-
-            <div class="space-y-4 text-sm">
-                <!-- 4 Piercing Gym Sound Profiles -->
-                <div>
-                    <label class="block text-xs font-extrabold text-amber-300 mb-2">알림음 종류 (체육관 음악을 뚫는 고주파 배음 설계)</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button id="soundStyle-bell" onclick="setSoundStyle('bell')" class="p-3 rounded-xl border-2 border-amber-400 bg-amber-400/15 text-white font-black text-xs flex flex-col items-center gap-1">
-                            <i class="fa-solid fa-bell text-amber-400 text-lg"></i>
-                            <span>1. 체육관 대형 공 & 딱딱이</span>
-                        </button>
-                        <button id="soundStyle-whistle" onclick="setSoundStyle('whistle')" class="p-3 rounded-xl border border-slate-700 bg-slate-800/70 text-slate-200 font-black text-xs flex flex-col items-center gap-1">
-                            <i class="fa-solid fa-bullhorn text-sky-400 text-lg"></i>
-                            <span>2. 심판 전자 호루라기 (최고음량)</span>
-                        </button>
-                        <button id="soundStyle-horn" onclick="setSoundStyle('horn')" class="p-3 rounded-xl border border-slate-700 bg-slate-800/70 text-slate-200 font-black text-xs flex flex-col items-center gap-1">
-                            <i class="fa-solid fa-tower-broadcast text-red-400 text-lg"></i>
-                            <span>3. 경기장 에어혼 버저</span>
-                        </button>
-                        <button id="soundStyle-beep" onclick="setSoundStyle('beep')" class="p-3 rounded-xl border border-slate-700 bg-slate-800/70 text-slate-200 font-black text-xs flex flex-col items-center gap-1">
-                            <i class="fa-solid fa-wave-square text-emerald-400 text-lg"></i>
-                            <span>4. 3000Hz 고주파 관통 비프</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Turbo Pre-Amp Volume Slider (Up to 300%) -->
-                <div class="p-3 rounded-xl bg-slate-950 border border-amber-500/30">
-                    <div class="flex justify-between text-xs font-black text-amber-300 mb-1.5">
-                        <span>🔊 프리앰프 터보 게인 증폭 (기본 250% 권장)</span>
-                        <span id="volumeLabel" class="font-mono text-sm">250%</span>
-                    </div>
-                    <input id="volumeSlider" type="range" min="50" max="300" step="10" value="250" oninput="changeVolume(this.value)" class="w-full accent-amber-400 cursor-pointer">
-                    <div class="flex justify-between text-[10px] text-slate-400 mt-1 font-bold">
-                        <span>50% (조용한 방)</span>
-                        <span>150% (일반)</span>
-                        <span class="text-amber-400">300% (시끄러운 체육관 최대 증폭)</span>
-                    </div>
-                </div>
-
-                <!-- Voice & Strobe Flash Toggles -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <label class="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
-                        <div>
-                            <div class="font-extrabold text-white text-xs">한국어 음성 코칭 동시 출력</div>
-                            <div class="text-[11px] text-slate-400">"운동 시작!", "라스트 10초!"</div>
-                        </div>
-                        <input id="voiceToggleInput" type="checkbox" checked onchange="toggleVoiceSetting(this.checked)" class="w-5 h-5 accent-emerald-400">
-                    </label>
-
-                    <label class="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
-                        <div>
-                            <div class="font-extrabold text-white text-xs">화면 섬광(Strobe) 플래시</div>
-                            <div class="text-[11px] text-slate-400">구간 전환 시 화면 번쩍임</div>
-                        </div>
-                        <input id="strobeToggleInput" type="checkbox" checked onchange="toggleStrobeSetting(this.checked)" class="w-5 h-5 accent-emerald-400">
-                    </label>
-                </div>
-
-                <!-- Sound Test Bar -->
-                <div class="grid grid-cols-3 gap-2 pt-1">
-                    <button onclick="testSound('work')" class="py-2.5 px-2 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs">
-                        🔔 운동 시작음
-                    </button>
-                    <button onclick="testSound('spurt')" class="py-2.5 px-2 rounded-xl bg-amber-400 text-slate-950 font-black text-xs">
-                        🥢 10초전 딱딱이
-                    </button>
-                    <button onclick="testSound('rest')" class="py-2.5 px-2 rounded-xl bg-red-500 text-white font-black text-xs">
-                        📣 라운드 종료음
-                    </button>
-                </div>
-            </div>
-
-            <button onclick="closeAudioModal()" class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-sm">
-                설정 완료 및 닫기
-            </button>
-        </div>
+    <!-- 심플 알림 토스트 -->
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-2xl bg-slate-900/95 border border-slate-700 text-white font-bold text-xs shadow-xl opacity-0 pointer-events-none transition-opacity duration-200 z-50">
+        저장되었습니다.
     </div>
 
-    <!-- Toast Notification Message Box -->
-    <div id="toastBox" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 transform -translate-y-2">
-        <div class="px-4 py-2.5 rounded-2xl bg-slate-950 border-2 border-amber-400 text-white font-black text-xs sm:text-sm shadow-2xl flex items-center gap-2">
-            <i class="fa-solid fa-bolt text-amber-400"></i>
-            <span id="toastText">설정이 적용되었습니다.</span>
-        </div>
-    </div>
-
-    <!-- ======================= APPLICATION JAVASCRIPT ======================= -->
     <script>
-        /**************************************************************
-         * 1. STATE & REALISTIC GYM PRESETS
-         **************************************************************/
-        const STORAGE_KEY = 'timer_plus_gym_pro_presets_v2';
+        /******************************************************************
+         * 1. 정식 PWA 서비스 워커(sw.js) 등록
+         ******************************************************************/
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(() => {});
+            });
+        }
 
-        const DEFAULT_PRESETS = [
+        /******************************************************************
+         * 2. 기본 루틴 데이터 및 상태 관리
+         ******************************************************************/
+        const STORAGE_KEY = 'timer_plus_clean_routines_v1';
+
+        const DEFAULT_ROUTINES = [
             {
-                id: 'preset-boxing-3m',
-                name: '복싱 스파링/샌드백 (3분 운동 / 1분 휴식 × 5R)',
+                id: 'rt-tabata',
+                name: '타바타 (20초 운동 / 10초 휴식)',
+                prepare: 10,
+                work: 20,
+                rest: 10,
+                cycles: 8,
+                sets: 1,
+                setRest: 60
+            },
+            {
+                id: 'rt-boxing',
+                name: '복싱 라운드 (3분 운동 / 1분 휴식 × 5R)',
                 prepare: 10,
                 work: 180,
                 rest: 60,
                 cycles: 5,
                 sets: 1,
-                setRest: 60,
-                cooldown: 0,
-                spurtWarn: 10,
-                halfwayAlert: false
+                setRest: 60
             },
             {
-                id: 'preset-boxing-2m',
-                name: '복싱 쉐도우/미트 (2분 운동 / 30초 휴식 × 6R)',
+                id: 'rt-circuit',
+                name: '서킷 트레이닝 (40초 운동 / 20초 휴식)',
                 prepare: 10,
-                work: 120,
-                rest: 30,
-                cycles: 6,
-                sets: 1,
-                setRest: 60,
-                cooldown: 0,
-                spurtWarn: 10,
-                halfwayAlert: false
-            },
-            {
-                id: 'preset-tabata-pro',
-                name: '고강도 피니셔 타바타 (20초 운동 / 10초 휴식 × 8R × 3세트)',
-                prepare: 10,
-                work: 20,
-                rest: 10,
-                cycles: 8,
-                sets: 3,
-                setRest: 60,
-                cooldown: 30,
-                spurtWarn: 0,
-                halfwayAlert: false
-            },
-            {
-                id: 'preset-circuit-45',
-                name: '근지구력 서킷 (45초 운동 / 15초 휴식 × 6R × 3세트)',
-                prepare: 10,
-                work: 45,
-                rest: 15,
+                work: 40,
+                rest: 20,
                 cycles: 6,
                 sets: 3,
-                setRest: 60,
-                cooldown: 30,
-                spurtWarn: 10,
-                halfwayAlert: true
+                setRest: 60
             }
         ];
 
-        let currentConfig = { ...DEFAULT_PRESETS[0] };
-        let savedPresets = [];
+        let routines = [];
+        let activeRoutine = { ...DEFAULT_ROUTINES[0] };
 
-        // Timeline Queue
-        let timeline = [];
-        let currentPhaseIndex = 0;
-        let remainingSeconds = 0;
+        let phases = [];
+        let phaseIndex = 0;
+        let timeLeft = 0;
         let isRunning = false;
+        let timerId = null;
+        let targetTimestamp = 0;
+        let lastBeepSecond = -1;
 
-        // Drift-free delta timing
-        let timerInterval = null;
-        let phaseEndTimestamp = 0;
-        let lastAnnouncedSecond = -1;
+        /******************************************************************
+         * 3. 맑고 풍부한 고음량 사운드 엔진 (불쾌한 고주파/노이즈 제거)
+         ******************************************************************/
+        let audioCtx = null;
+        let compressor = null;
+        let masterGain = null;
 
-        // High-Visibility & Glove Controls
-        let highContrastBgMode = true; // Default ON so user can see from 10m away
-        let gloveTapEnabled = true;
-
-        // Turbo Audio Settings
-        let audioSettings = {
+        let soundConfig = {
             muted: false,
-            style: 'bell', // 'bell', 'whistle', 'horn', 'beep'
-            voice: true,
-            strobe: true,
-            boostGain: 2.5 // 250% default turbo boost
+            type: 'bell', // 'bell' 또는 'chime'
+            volume: 1.0,  // 0.2 ~ 1.0
+            voice: true
         };
 
-        let audioCtx = null;
-        let masterCompressor = null;
-        let preAmpGain = null;
-        let wakeLockSentinel = null;
-
-        /**************************************************************
-         * 2. EXTREME 300% TURBO AUDIO ENGINE (COMPRESSOR + MULTI-HARMONIC)
-         **************************************************************/
-        function ensureAudioContext() {
+        function initAudio() {
             if (!audioCtx) {
                 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (AudioContextClass) {
-                    audioCtx = new AudioContextClass();
+                audioCtx = new AudioContextClass();
 
-                    // DynamicsCompressor maximizes loudness without harsh digital clipping
-                    masterCompressor = audioCtx.createDynamicsCompressor();
-                    masterCompressor.threshold.setValueAtTime(-18, audioCtx.currentTime);
-                    masterCompressor.knee.setValueAtTime(12, audioCtx.currentTime);
-                    masterCompressor.ratio.setValueAtTime(12, audioCtx.currentTime);
-                    masterCompressor.attack.setValueAtTime(0.002, audioCtx.currentTime);
-                    masterCompressor.release.setValueAtTime(0.15, audioCtx.currentTime);
+                // 소리가 찢어지지 않으면서 단단하고 크게 들리도록 리미터/컴프레서 적용
+                compressor = audioCtx.createDynamicsCompressor();
+                compressor.threshold.setValueAtTime(-14, audioCtx.currentTime);
+                compressor.knee.setValueAtTime(10, audioCtx.currentTime);
+                compressor.ratio.setValueAtTime(6, audioCtx.currentTime);
+                compressor.attack.setValueAtTime(0.003, audioCtx.currentTime);
+                compressor.release.setValueAtTime(0.2, audioCtx.currentTime);
 
-                    preAmpGain = audioCtx.createGain();
-                    preAmpGain.gain.setValueAtTime(audioSettings.boostGain, audioCtx.currentTime);
+                masterGain = audioCtx.createGain();
+                masterGain.gain.setValueAtTime(soundConfig.volume * 1.8, audioCtx.currentTime);
 
-                    preAmpGain.connect(masterCompressor);
-                    masterCompressor.connect(audioCtx.destination);
-                }
+                masterGain.connect(compressor);
+                compressor.connect(audioCtx.destination);
             }
-            if (audioCtx && audioCtx.state === 'suspended') {
+            if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
-            if (preAmpGain && audioCtx) {
-                preAmpGain.gain.setValueAtTime(audioSettings.boostGain, audioCtx.currentTime);
-            }
+            masterGain.gain.setValueAtTime(soundConfig.volume * 1.8, audioCtx.currentTime);
         }
 
-        function playOscLayer(freq, type, duration, delay = 0, layerGain = 1.0, freqEnd = null) {
-            if (audioSettings.muted) return;
-            ensureAudioContext();
-            if (!audioCtx || !preAmpGain) return;
+        // 부드러운 사인파(Sine)와 삼각파(Triangle)만 조합해 귀가 편안하고 또렷한 음색 생성
+        function playCleanTone(freq, waveType, duration, delay = 0, amp = 0.8) {
+            if (soundConfig.muted) return;
+            initAudio();
 
-            const startTime = audioCtx.currentTime + delay;
+            const start = audioCtx.currentTime + delay;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
 
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, startTime);
-            if (freqEnd) {
-                osc.frequency.exponentialRampToValueAtTime(freqEnd, startTime + duration);
-            }
+            osc.type = waveType;
+            osc.frequency.setValueAtTime(freq, start);
 
-            gain.gain.setValueAtTime(layerGain, startTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+            // 부드러운 어택(클릭 노이즈 방지)과 자연스러운 울림 감衰
+            gain.gain.setValueAtTime(0.001, start);
+            gain.gain.linearRampToValueAtTime(amp, start + 0.012);
+            gain.gain.exponentialRampToValueAtTime(0.0008, start + duration);
 
             osc.connect(gain);
-            gain.connect(preAmpGain);
+            gain.connect(masterGain);
 
-            osc.start(startTime);
-            osc.stop(startTime + duration);
+            osc.start(start);
+            osc.stop(start + duration);
         }
 
-        // 1. Heavy Gym Boxing Gong (Metallic multi-harmonic strike that cuts through bass)
-        function playGymGong(strikes = 1) {
-            if (audioSettings.muted) return;
-            for (let s = 0; s < strikes; s++) {
-                const d = s * 0.22;
-                // Fundamental + piercing 2kHz-3.5kHz metallic ring
-                playOscLayer(587.33, 'sawtooth', 1.2, d, 0.9);
-                playOscLayer(1174.66, 'square', 0.9, d, 0.8);
-                playOscLayer(2349.32, 'sawtooth', 0.65, d, 0.85);
-                playOscLayer(3135.96, 'sine', 0.45, d, 0.75);
-                // Initial metallic transient impact
-                playOscLayer(3800, 'square', 0.07, d, 1.0, 900);
+        // 1) 맑고 중후한 브라스 벨 사운드 (운동 시작 / 휴식 알림)
+        function playResonantBell(strikes = 1, pitchScale = 1.0) {
+            for (let i = 0; i < strikes; i++) {
+                const offset = i * 0.28;
+                // 따뜻한 기본음(659Hz E5)과 화음 배음(Sine + Triangle)
+                playCleanTone(659.25 * pitchScale, 'triangle', 1.1, offset, 0.9);
+                playCleanTone(1318.5 * pitchScale, 'sine', 0.8, offset, 0.65);
+                playCleanTone(1975.5 * pitchScale, 'sine', 0.45, offset, 0.35);
             }
         }
 
-        // 2. Boxing Ring 10-Second Wood Clapper ("딱! 딱! 딱!")
-        function playWoodClapper(claps = 3) {
-            if (audioSettings.muted) return;
-            for (let i = 0; i < claps; i++) {
-                const d = i * 0.16;
-                // Sharp woody pitch-drop transient at 2400Hz -> 800Hz
-                playOscLayer(2600, 'square', 0.065, d, 1.0, 750);
-                playOscLayer(1850, 'sawtooth', 0.08, d, 0.95, 620);
-                playOscLayer(3200, 'triangle', 0.04, d, 0.9);
+        // 2) 깔끔한 스포츠 차임 비프 (Timer Plus 스타일)
+        function playSportChime(ascending = true) {
+            if (ascending) {
+                // 운동 시작: 경쾌하게 올라가는 화음 (A5 -> E6)
+                playCleanTone(880, 'triangle', 0.18, 0, 0.8);
+                playCleanTone(1318.5, 'sine', 0.45, 0.15, 0.9);
+            } else {
+                // 휴식 시작: 차분하게 내려오는 화음 (E6 -> A5)
+                playCleanTone(1318.5, 'triangle', 0.18, 0, 0.8);
+                playCleanTone(880, 'sine', 0.45, 0.15, 0.9);
             }
         }
 
-        // 3. Piercing Referee Pea Whistle (2800Hz + 3150Hz dual-tone modulation)
-        function playRefereeWhistle(duration = 0.65, bursts = 1) {
-            if (audioSettings.muted) return;
-            for (let b = 0; b < bursts; b++) {
-                const baseDelay = b * (duration + 0.12);
-                // Rapid pea-whistle flutter
-                const steps = Math.floor(duration / 0.04);
-                for (let i = 0; i < steps; i++) {
-                    const stepDelay = baseDelay + i * 0.04;
-                    const mod = (i % 2 === 0) ? 2850 : 3120;
-                    playOscLayer(mod, 'square', 0.045, stepDelay, 0.95);
-                    playOscLayer(mod + 240, 'sawtooth', 0.045, stepDelay, 0.85);
-                }
-            }
+        // 3) 3-2-1 카운트다운 틱 (맑은 880Hz 정음)
+        function playCountdownTick() {
+            playCleanTone(880, 'sine', 0.14, 0, 0.7);
+            playCleanTone(440, 'triangle', 0.14, 0, 0.4);
         }
 
-        // 4. Stadium Air Horn Buzzer
-        function playArenaAirHorn(duration = 0.75, blasts = 1) {
-            if (audioSettings.muted) return;
-            for (let b = 0; b < blasts; b++) {
-                const d = b * (duration + 0.15);
-                playOscLayer(392.00, 'sawtooth', duration, d, 1.0);
-                playOscLayer(493.88, 'sawtooth', duration, d, 0.95);
-                playOscLayer(784.00, 'square', duration, d, 0.85);
-                playOscLayer(1567.98, 'sawtooth', duration, d, 0.8);
-            }
-        }
-
-        // 5. 3000Hz Piercing Electronic Beep
-        function playPiercingBeep(duration = 0.35, count = 2) {
-            if (audioSettings.muted) return;
-            for (let i = 0; i < count; i++) {
-                const d = i * (duration + 0.1);
-                playOscLayer(3000, 'square', duration, d, 1.0);
-                playOscLayer(1500, 'sawtooth', duration, d, 0.8);
-            }
-        }
-
-        // Visual Strobe + Vibration for noisy gym awareness
-        function triggerGymVisualAndHaptic(pattern = [200, 100, 200]) {
-            if (audioSettings.strobe) {
-                const overlay = document.getElementById('strobeOverlay');
-                overlay.classList.remove('strobe-active');
-                void overlay.offsetWidth; // Reflow
-                overlay.classList.add('strobe-active');
-            }
-            if ('vibrate' in navigator) {
-                try { navigator.vibrate(pattern); } catch (e) {}
-            }
-        }
-
-        function speakKorean(text) {
-            if (audioSettings.muted || !audioSettings.voice) return;
+        function speakText(text) {
+            if (soundConfig.muted || !soundConfig.voice) return;
             if (!('speechSynthesis' in window)) return;
             try {
                 window.speechSynthesis.cancel();
                 const utter = new SpeechSynthesisUtterance(text);
                 utter.lang = 'ko-KR';
-                utter.rate = 1.12;
-                utter.pitch = 1.05;
-                utter.volume = 1.0;
+                utter.rate = 1.05;
+                utter.volume = Math.min(1.0, soundConfig.volume);
                 window.speechSynthesis.speak(utter);
             } catch (e) {}
         }
 
-        function triggerPhaseAudio(phaseType, cycleNum, setNum) {
-            triggerGymVisualAndHaptic([300, 100, 300]);
-            if (audioSettings.muted) return;
+        function playPhaseAlert(phaseType) {
+            if (soundConfig.muted) return;
 
-            if (phaseType === 'PREPARE') {
-                playPiercingBeep(0.2, 2);
-                speakKorean('준비하세요');
-            } else if (phaseType === 'WORK') {
-                if (audioSettings.style === 'bell') playGymGong(2);
-                else if (audioSettings.style === 'whistle') playRefereeWhistle(0.65, 1);
-                else if (audioSettings.style === 'horn') playArenaAirHorn(0.7, 1);
-                else playPiercingBeep(0.35, 2);
-
-                speakKorean(`${cycleNum}라운드 운동 시작!`);
-            } else if (phaseType === 'REST') {
-                if (audioSettings.style === 'bell') playGymGong(3);
-                else if (audioSettings.style === 'whistle') playRefereeWhistle(0.35, 2);
-                else if (audioSettings.style === 'horn') playArenaAirHorn(0.45, 2);
-                else playPiercingBeep(0.25, 3);
-
-                speakKorean('휴식!');
-            } else if (phaseType === 'SETREST') {
-                playGymGong(3);
-                speakKorean(`${setNum}세트 완료! 세트 휴식`);
-            } else if (phaseType === 'COOLDOWN') {
-                playGymGong(1);
-                speakKorean('마무리 스트레칭');
+            if (phaseType === 'WORK') {
+                if (soundConfig.type === 'bell') playResonantBell(1, 1.0);
+                else playSportChime(true);
+                speakText('운동 시작');
+            } else if (phaseType === 'REST' || phaseType === 'SETREST') {
+                if (soundConfig.type === 'bell') playResonantBell(2, 0.85);
+                else playSportChime(false);
+                speakText(phaseType === 'SETREST' ? '세트 휴식' : '휴식');
             } else if (phaseType === 'DONE') {
-                playGymGong(4);
-                speakKorean('모든 운동 완료! 수고하셨습니다!');
+                if (soundConfig.type === 'bell') playResonantBell(3, 1.0);
+                else {
+                    playSportChime(true);
+                    setTimeout(() => playSportChime(true), 300);
+                }
+                speakText('운동이 완료되었습니다');
             }
         }
 
-        function triggerCountdownBeep(secLeft) {
-            if (audioSettings.strobe) {
-                const overlay = document.getElementById('strobeOverlay');
-                overlay.classList.remove('strobe-active');
-                void overlay.offsetWidth;
-                overlay.classList.add('strobe-active');
-            }
-            if (audioSettings.muted) return;
-            // High-decibel 2800Hz countdown pip
-            playOscLayer(2800, 'square', 0.14, 0, 0.95);
-            playOscLayer(1400, 'sawtooth', 0.14, 0, 0.8);
+        function previewCurrentSound() {
+            initAudio();
+            playPhaseAlert('WORK');
         }
 
-        function triggerSpurtClapperWarning(secondsLeft) {
-            triggerGymVisualAndHaptic([150, 80, 150, 80, 150]);
-            playWoodClapper(3);
-            setTimeout(() => {
-                speakKorean(`라스트 ${secondsLeft}초!`);
-            }, 450);
-        }
+        /******************************************************************
+         * 4. 타이머 타임라인 생성 및 화면 렌더링
+         ******************************************************************/
+        // Timer Plus 정통 컬러 테마
+        const PHASE_COLORS = {
+            PREPARE: '#D97706', // 앰버 옐로우 (준비)
+            WORK:    '#059669', // 에메랄드 그린 (운동)
+            REST:    '#E11D48', // 코랄 레드 (휴식)
+            SETREST: '#2563EB', // 로얄 블루 (세트 휴식)
+            DONE:    '#0F172A'  // 다크 슬레이트 (완료)
+        };
 
-        function triggerHalfwayAlert() {
-            playWoodClapper(2);
-            setTimeout(() => {
-                speakKorean('절반 경과!');
-            }, 320);
-        }
-
-        function testSound(kind) {
-            ensureAudioContext();
-            if (kind === 'work') {
-                triggerPhaseAudio('WORK', 1, 1);
-            } else if (kind === 'spurt') {
-                triggerSpurtClapperWarning(10);
-            } else if (kind === 'whistle') {
-                playRefereeWhistle(0.65, 1);
-            } else if (kind === 'rest') {
-                triggerPhaseAudio('REST', 1, 1);
-            }
-        }
-
-        /**************************************************************
-         * 3. TIMELINE COMPILER
-         **************************************************************/
-        function buildTimeline(config) {
+        function compilePhases(rt) {
             const list = [];
-            const totalCycles = Math.max(1, parseInt(config.cycles) || 1);
-            const totalSets = Math.max(1, parseInt(config.sets) || 1);
-            const spurtWarn = parseInt(config.spurtWarn) || 0;
-            const halfwayAlert = !!config.halfwayAlert;
+            const cycles = Math.max(1, parseInt(rt.cycles) || 1);
+            const sets = Math.max(1, parseInt(rt.sets) || 1);
 
-            if (config.prepare > 0) {
+            if (rt.prepare > 0) {
                 list.push({
                     type: 'PREPARE',
-                    label: '준비 (PREPARE)',
-                    shortLabel: '준비',
-                    tag: 'GET READY',
-                    duration: config.prepare,
+                    title: '준비 (PREPARE)',
+                    short: '준비',
+                    duration: rt.prepare,
                     cycle: 1,
-                    totalCycles,
+                    totalCycles: cycles,
                     set: 1,
-                    totalSets,
-                    spurtWarn: 0,
-                    halfwayAlert: false
+                    totalSets: sets
                 });
             }
 
-            for (let s = 1; s <= totalSets; s++) {
-                for (let c = 1; c <= totalCycles; c++) {
+            for (let s = 1; s <= sets; s++) {
+                for (let c = 1; c <= cycles; c++) {
                     list.push({
                         type: 'WORK',
-                        label: '운동 (WORK)',
-                        shortLabel: '운동',
-                        tag: `ROUND ${c} / ${totalCycles}`,
-                        duration: Math.max(1, config.work),
+                        title: '운동 (WORK)',
+                        short: '운동',
+                        duration: Math.max(1, rt.work),
                         cycle: c,
-                        totalCycles,
+                        totalCycles: cycles,
                         set: s,
-                        totalSets,
-                        spurtWarn,
-                        halfwayAlert
+                        totalSets: sets
                     });
 
-                    const isLastCycleInSet = (c === totalCycles);
-                    if (!isLastCycleInSet && config.rest > 0) {
+                    if (c < cycles && rt.rest > 0) {
                         list.push({
                             type: 'REST',
-                            label: '휴식 (REST)',
-                            shortLabel: '휴식',
-                            tag: `REST ${c} / ${totalCycles}`,
-                            duration: config.rest,
+                            title: '휴식 (REST)',
+                            short: '휴식',
+                            duration: rt.rest,
                             cycle: c,
-                            totalCycles,
+                            totalCycles: cycles,
                             set: s,
-                            totalSets,
-                            spurtWarn: 0,
-                            halfwayAlert: false
+                            totalSets: sets
                         });
                     }
                 }
 
-                const isLastSet = (s === totalSets);
-                if (!isLastSet && config.setRest > 0) {
+                if (s < sets && rt.setRest > 0) {
                     list.push({
                         type: 'SETREST',
-                        label: '세트 휴식 (SET REST)',
-                        shortLabel: '세트휴식',
-                        tag: `SET ${s} COMPLETE`,
-                        duration: config.setRest,
-                        cycle: totalCycles,
-                        totalCycles,
+                        title: '세트 휴식 (SET REST)',
+                        short: '세트 휴식',
+                        duration: rt.setRest,
+                        cycle: cycles,
+                        totalCycles: cycles,
                         set: s,
-                        totalSets,
-                        spurtWarn: 0,
-                        halfwayAlert: false
+                        totalSets: sets
                     });
                 }
             }
-
-            if (config.cooldown > 0) {
-                list.push({
-                    type: 'COOLDOWN',
-                    label: '마무리 (COOL DOWN)',
-                    shortLabel: '쿨다운',
-                    tag: 'COOL DOWN',
-                    duration: config.cooldown,
-                    cycle: totalCycles,
-                    totalCycles,
-                    set: totalSets,
-                    totalSets,
-                    spurtWarn: 0,
-                    halfwayAlert: false
-                });
-            }
-
             return list;
         }
 
-        function getTotalTimelineDuration(list) {
-            return list.reduce((acc, item) => acc + item.duration, 0);
+        function formatMMSS(sec) {
+            const s = Math.max(0, Math.ceil(sec));
+            const mins = Math.floor(s / 60);
+            const secs = s % 60;
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
         }
 
-        function getRemainingTotalSeconds() {
-            if (!timeline.length || currentPhaseIndex >= timeline.length) return 0;
-            let sum = remainingSeconds;
-            for (let i = currentPhaseIndex + 1; i < timeline.length; i++) {
-                sum += timeline[i].duration;
+        function getTotalRemaining() {
+            if (!phases.length || phaseIndex >= phases.length) return 0;
+            let total = timeLeft;
+            for (let i = phaseIndex + 1; i < phases.length; i++) {
+                total += phases[i].duration;
             }
-            return sum;
+            return total;
         }
 
-        /**************************************************************
-         * 4. HIGH-VISIBILITY GYM RENDERER & PRECISION TIMER
-         **************************************************************/
-        function formatMMSS(totalSec) {
-            const sec = Math.max(0, Math.ceil(totalSec));
-            const m = Math.floor(sec / 60);
-            const s = sec % 60;
-            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-        }
-
-        const GYM_THEMES = {
-            PREPARE: {
-                fullBg: '#CA8A04',      // Vivid Cyber Yellow-Amber
-                darkBg: '#090D16',
-                barColor: 'bg-amber-300',
-                accentText: 'text-amber-300'
-            },
-            WORK: {
-                fullBg: '#059669',      // Intense Gym Emerald Green
-                darkBg: '#061A14',
-                barColor: 'bg-emerald-300',
-                accentText: 'text-emerald-300'
-            },
-            SPURT: {
-                fullBg: '#D97706',      // Blazing Final 10s Spurt Orange
-                darkBg: '#231204',
-                barColor: 'bg-amber-300',
-                accentText: 'text-amber-300'
-            },
-            REST: {
-                fullBg: '#DC2626',      // Unmistakable Crimson Red
-                darkBg: '#1F0709',
-                barColor: 'bg-red-300',
-                accentText: 'text-red-300'
-            },
-            SETREST: {
-                fullBg: '#7C3AED',      // Deep Violet
-                darkBg: '#140929',
-                barColor: 'bg-violet-300',
-                accentText: 'text-violet-300'
-            },
-            COOLDOWN: {
-                fullBg: '#0D9488',      // Teal
-                darkBg: '#061D1D',
-                barColor: 'bg-teal-300',
-                accentText: 'text-teal-300'
-            },
-            DONE: {
-                fullBg: '#10B981',
-                darkBg: '#090D16',
-                barColor: 'bg-emerald-300',
-                accentText: 'text-emerald-300'
-            }
-        };
-
-        function loadConfigIntoTimer(config) {
+        function loadRoutineToTimer(rt) {
             pauseTimer();
-            currentConfig = { ...config };
-            timeline = buildTimeline(currentConfig);
-            currentPhaseIndex = 0;
-            remainingSeconds = timeline.length > 0 ? timeline[0].duration : 0;
-            lastAnnouncedSecond = -1;
+            activeRoutine = { ...rt };
+            phases = compilePhases(activeRoutine);
+            phaseIndex = 0;
+            timeLeft = phases.length ? phases[0].duration : 0;
+            lastBeepSecond = -1;
 
-            document.getElementById('activePresetHeader').textContent = currentConfig.name || '사용자 루틴';
-            syncSetupInputsWithCurrentConfig();
-            updateTimerUI();
+            document.getElementById('routineTitleHeader').textContent = activeRoutine.name;
+            syncSetupForm();
+            renderTimerScreen();
         }
 
-        function updateTimerUI() {
+        function renderTimerScreen() {
             const body = document.getElementById('appBody');
-            const bar = document.getElementById('giantProgressBar');
-            const spurtBanner = document.getElementById('spurtAlertBanner');
-            const totalDuration = getTotalTimelineDuration(timeline);
-            const totalRemaining = getRemainingTotalSeconds();
+            const bar = document.getElementById('progressBar');
 
-            if (currentPhaseIndex >= timeline.length) {
-                const th = GYM_THEMES.DONE;
-                body.style.backgroundColor = highContrastBgMode ? th.fullBg : th.darkBg;
-                document.getElementById('phaseTitle').textContent = '운동 완료! (COMPLETE)';
-                document.getElementById('phaseSubTag').textContent = 'GREAT WORKOUT!';
-                document.getElementById('mainTimeDisplay').textContent = '00:00';
-                document.getElementById('nextPhaseLabel').textContent = '모든 루틴 종료';
-                document.getElementById('totalRemainingDisplay').textContent = '00:00';
-                document.getElementById('overallPercentDisplay').textContent = '100%';
+            if (phaseIndex >= phases.length) {
+                body.style.backgroundColor = PHASE_COLORS.DONE;
+                document.getElementById('phaseBadge').textContent = '완료 (COMPLETE)';
+                document.getElementById('nextUpText').textContent = '모든 운동을 마쳤습니다!';
+                document.getElementById('timeDisplay').textContent = '00:00';
+                document.getElementById('totalRemainText').textContent = '00:00';
                 bar.style.width = '100%';
-                spurtBanner.classList.add('hidden');
-                spurtBanner.classList.remove('flex');
-                updateStartPauseButtonUI();
+                updateStartButtonState();
                 return;
             }
 
-            const phase = timeline[currentPhaseIndex];
-            const isSpurtActive = (phase.type === 'WORK' && phase.spurtWarn > 0 && remainingSeconds <= phase.spurtWarn && remainingSeconds > 0);
-            const themeKey = isSpurtActive ? 'SPURT' : phase.type;
-            const th = GYM_THEMES[themeKey] || GYM_THEMES.WORK;
+            const cur = phases[phaseIndex];
+            body.style.backgroundColor = PHASE_COLORS[cur.type] || PHASE_COLORS.DONE;
 
-            // Apply Full-Screen High-Contrast Background for 10m distance readability
-            body.style.backgroundColor = highContrastBgMode ? th.fullBg : th.darkBg;
+            document.getElementById('phaseBadge').textContent = cur.title;
+            document.getElementById('timeDisplay').textContent = formatMMSS(timeLeft);
+            document.getElementById('totalRemainText').textContent = formatMMSS(getTotalRemaining());
 
-            // Update Spurt Banner & Title
-            if (isSpurtActive) {
-                document.getElementById('phaseTitle').textContent = `🔥 라스트 스퍼트! (${remainingSeconds}초)`;
-                spurtBanner.classList.remove('hidden');
-                spurtBanner.classList.add('flex');
-            } else {
-                document.getElementById('phaseTitle').textContent = phase.label;
-                spurtBanner.classList.add('hidden');
-                spurtBanner.classList.remove('flex');
-            }
+            const next = phases[phaseIndex + 1];
+            document.getElementById('nextUpText').textContent = next
+                ? `다음: ${next.short} ${formatMMSS(next.duration)}`
+                : '다음: 마지막 구간';
 
-            document.getElementById('phaseSubTag').textContent = phase.tag;
-            document.getElementById('mainTimeDisplay').textContent = formatMMSS(remainingSeconds);
-            document.getElementById('totalRemainingDisplay').textContent = formatMMSS(totalRemaining);
+            document.getElementById('cycleCurrent').textContent = cur.cycle;
+            document.getElementById('cycleTotal').textContent = cur.totalCycles;
+            document.getElementById('setCurrent').textContent = cur.set;
+            document.getElementById('setTotal').textContent = cur.totalSets;
 
-            // Next Phase Label
-            const nextPhase = timeline[currentPhaseIndex + 1];
-            if (nextPhase) {
-                document.getElementById('nextPhaseLabel').textContent = `${nextPhase.shortLabel} ${formatMMSS(nextPhase.duration)}`;
-            } else {
-                document.getElementById('nextPhaseLabel').textContent = '마지막 구간!';
-            }
+            const pct = cur.duration > 0 ? (timeLeft / cur.duration) * 100 : 0;
+            bar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
 
-            // Round & Set Numbers
-            document.getElementById('currentCycleNum').textContent = phase.cycle;
-            document.getElementById('totalCycleNum').textContent = phase.totalCycles;
-            document.getElementById('currentSetNum').textContent = phase.set;
-            document.getElementById('totalSetNum').textContent = phase.totalSets;
-
-            // Progress Bar & Percentage
-            const ratio = phase.duration > 0 ? (remainingSeconds / phase.duration) : 0;
-            bar.style.width = `${Math.max(0, Math.min(100, ratio * 100))}%`;
-            bar.className = `h-full rounded-xl transition-all duration-150 ${th.barColor}`;
-
-            const elapsed = totalDuration - totalRemaining;
-            const overallPct = totalDuration > 0 ? Math.min(100, Math.round((elapsed / totalDuration) * 100)) : 0;
-            document.getElementById('overallPercentDisplay').textContent = `${overallPct}%`;
-
-            updateStartPauseButtonUI();
+            updateStartButtonState();
         }
 
-        function updateStartPauseButtonUI() {
-            const btn = document.getElementById('startPauseBtn');
+        function updateStartButtonState() {
             const icon = document.getElementById('startPauseIcon');
-            const text = document.getElementById('startPauseText');
-
+            const label = document.getElementById('startPauseLabel');
             if (isRunning) {
-                btn.className = 'flex-1 max-w-xs h-14 sm:h-16 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 border-2 border-white font-black text-xl sm:text-2xl tracking-tight flex items-center justify-center gap-3 shadow-2xl transition active:scale-95';
-                icon.className = 'fa-solid fa-pause text-2xl';
-                text.textContent = '일시정지';
+                icon.className = 'fa-solid fa-pause';
+                label.textContent = '일시정지';
             } else {
-                btn.className = 'flex-1 max-w-xs h-14 sm:h-16 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 border-2 border-white font-black text-xl sm:text-2xl tracking-tight flex items-center justify-center gap-3 shadow-2xl transition active:scale-95';
-                icon.className = 'fa-solid fa-play text-2xl';
-                text.textContent = currentPhaseIndex >= timeline.length ? '다시 시작' : '운동 시작';
+                icon.className = 'fa-solid fa-play';
+                label.textContent = phaseIndex >= phases.length ? '다시 시작' : '시작';
             }
         }
 
-        function handleGloveZoneTap() {
-            if (!gloveTapEnabled) return;
-            toggleTimer();
-        }
-
-        function toggleGloveTouchLock() {
-            gloveTapEnabled = !gloveTapEnabled;
-            const textEl = document.getElementById('gloveLockText');
-            const iconEl = document.getElementById('gloveLockIcon');
-            if (gloveTapEnabled) {
-                textEl.textContent = '화면터치 일시정지 ON';
-                iconEl.className = 'fa-solid fa-hand-fist text-amber-300';
-                showToast('글러브 터치 모드 ON: 시계 화면 어디든 누르면 일시정지/시작됩니다.');
-            } else {
-                textEl.textContent = '화면터치 잠금됨';
-                iconEl.className = 'fa-solid fa-lock text-red-400';
-                showToast('화면 터치 잠금: 하단 버튼으로만 조작합니다.');
-            }
-        }
-
-        function toggleHighContrastBg() {
-            highContrastBgMode = !highContrastBgMode;
-            document.getElementById('bgModeLabel').textContent = highContrastBgMode ? '배경반전 ON' : '다크모드';
-            updateTimerUI();
-            showToast(highContrastBgMode ? '원거리 배경 전체 컬러 반전 모드 ON' : '다크 네온 모드 ON');
-        }
-
-        function toggleTimer() {
-            ensureAudioContext();
+        /******************************************************************
+         * 5. 타이머 작동 제어
+         ******************************************************************/
+        function toggleStartPause() {
+            initAudio();
             if (isRunning) pauseTimer();
             else startTimer();
         }
 
         function startTimer() {
-            if (!timeline.length) return;
-            if (currentPhaseIndex >= timeline.length) {
-                currentPhaseIndex = 0;
-                remainingSeconds = timeline[0].duration;
+            if (!phases.length) return;
+            if (phaseIndex >= phases.length) {
+                phaseIndex = 0;
+                timeLeft = phases[0].duration;
             }
 
             isRunning = true;
             requestWakeLock();
 
-            const currentPhase = timeline[currentPhaseIndex];
-            if (remainingSeconds === currentPhase.duration && lastAnnouncedSecond !== remainingSeconds) {
-                triggerPhaseAudio(currentPhase.type, currentPhase.cycle, currentPhase.set);
-                lastAnnouncedSecond = remainingSeconds;
+            const cur = phases[phaseIndex];
+            if (timeLeft === cur.duration && lastBeepSecond !== timeLeft) {
+                if (cur.type === 'PREPARE') speakText('준비');
+                else playPhaseAlert(cur.type);
+                lastBeepSecond = timeLeft;
             }
 
-            phaseEndTimestamp = performance.now() + (remainingSeconds * 1000);
-            updateTimerUI();
+            targetTimestamp = performance.now() + timeLeft * 1000;
+            renderTimerScreen();
 
-            clearInterval(timerInterval);
-            timerInterval = setInterval(checkTimerDelta, 100);
+            clearInterval(timerId);
+            timerId = setInterval(tick, 100);
         }
 
         function pauseTimer() {
             isRunning = false;
-            clearInterval(timerInterval);
-            timerInterval = null;
-            updateTimerUI();
+            clearInterval(timerId);
+            timerId = null;
+            renderTimerScreen();
         }
 
         function resetTimer() {
             pauseTimer();
-            currentPhaseIndex = 0;
-            remainingSeconds = timeline.length > 0 ? timeline[0].duration : 0;
-            lastAnnouncedSecond = -1;
-            updateTimerUI();
-            showToast('타이머가 처음으로 초기화되었습니다.');
+            phaseIndex = 0;
+            timeLeft = phases.length ? phases[0].duration : 0;
+            lastBeepSecond = -1;
+            renderTimerScreen();
         }
 
-        function skipPhase(direction) {
-            ensureAudioContext();
-            if (!timeline.length) return;
-            const nextIndex = currentPhaseIndex + direction;
-            lastAnnouncedSecond = -1;
+        function skipNextPhase() {
+            initAudio();
+            if (!phases.length) return;
+            lastBeepSecond = -1;
 
-            if (nextIndex < 0) {
-                currentPhaseIndex = 0;
-                remainingSeconds = timeline[0].duration;
-            } else if (nextIndex >= timeline.length) {
-                currentPhaseIndex = timeline.length;
-                remainingSeconds = 0;
-                pauseTimer();
-                triggerPhaseAudio('DONE', 1, 1);
-            } else {
-                currentPhaseIndex = nextIndex;
-                remainingSeconds = timeline[currentPhaseIndex].duration;
-                phaseEndTimestamp = performance.now() + (remainingSeconds * 1000);
+            if (phaseIndex + 1 < phases.length) {
+                phaseIndex++;
+                timeLeft = phases[phaseIndex].duration;
+                targetTimestamp = performance.now() + timeLeft * 1000;
                 if (isRunning) {
-                    const p = timeline[currentPhaseIndex];
-                    triggerPhaseAudio(p.type, p.cycle, p.set);
-                    lastAnnouncedSecond = remainingSeconds;
+                    playPhaseAlert(phases[phaseIndex].type);
+                    lastBeepSecond = timeLeft;
                 }
+            } else {
+                phaseIndex = phases.length;
+                timeLeft = 0;
+                pauseTimer();
+                playPhaseAlert('DONE');
             }
-            updateTimerUI();
+            renderTimerScreen();
         }
 
-        function checkTimerDelta() {
+        function tick() {
             if (!isRunning) return;
-            const now = performance.now();
-            const msLeft = phaseEndTimestamp - now;
-            const newSecLeft = Math.max(0, Math.ceil(msLeft / 1000));
+            const remainingMs = targetTimestamp - performance.now();
+            const newSec = Math.max(0, Math.ceil(remainingMs / 1000));
 
-            if (newSecLeft !== remainingSeconds) {
-                remainingSeconds = newSecLeft;
-
-                if (remainingSeconds > 0) {
-                    const phase = timeline[currentPhaseIndex];
-                    const halfwaySec = Math.floor(phase.duration / 2);
-
-                    // 1. Spurt Clapper Warning (e.g. 10 seconds left)
-                    if (phase.type === 'WORK' && phase.spurtWarn > 0 && remainingSeconds === phase.spurtWarn) {
-                        triggerSpurtClapperWarning(remainingSeconds);
+            if (newSec !== timeLeft) {
+                timeLeft = newSec;
+                if (timeLeft > 0) {
+                    if (timeLeft <= 3 && timeLeft >= 1) {
+                        playCountdownTick();
                     }
-                    // 2. Halfway Alert
-                    else if (phase.type === 'WORK' && phase.halfwayAlert && phase.duration >= 20 && remainingSeconds === halfwaySec) {
-                        triggerHalfwayAlert();
-                    }
-                    // 3. Final 3-2-1 Countdown Beep
-                    else if (remainingSeconds <= 3 && remainingSeconds >= 1) {
-                        triggerCountdownBeep(remainingSeconds);
-                    }
-                    updateTimerUI();
+                    renderTimerScreen();
                 } else {
-                    // Advance to next phase immediately
-                    currentPhaseIndex += 1;
-                    lastAnnouncedSecond = -1;
-                    if (currentPhaseIndex < timeline.length) {
-                        const nextPhase = timeline[currentPhaseIndex];
-                        remainingSeconds = nextPhase.duration;
-                        phaseEndTimestamp = performance.now() + (remainingSeconds * 1000);
-                        triggerPhaseAudio(nextPhase.type, nextPhase.cycle, nextPhase.set);
-                        lastAnnouncedSecond = remainingSeconds;
-                        updateTimerUI();
+                    phaseIndex++;
+                    lastBeepSecond = -1;
+                    if (phaseIndex < phases.length) {
+                        const next = phases[phaseIndex];
+                        timeLeft = next.duration;
+                        targetTimestamp = performance.now() + timeLeft * 1000;
+                        playPhaseAlert(next.type);
+                        lastBeepSecond = timeLeft;
+                        renderTimerScreen();
                     } else {
-                        remainingSeconds = 0;
+                        timeLeft = 0;
                         pauseTimer();
-                        triggerPhaseAudio('DONE', 1, 1);
-                        updateTimerUI();
+                        playPhaseAlert('DONE');
+                        renderTimerScreen();
                     }
                 }
             }
         }
 
-        /**************************************************************
-         * 5. SETUP TAB & INPUT HANDLERS
-         **************************************************************/
-        function syncSetupInputsWithCurrentConfig() {
-            document.getElementById('inputPresetName').value = currentConfig.name || '나만의 루틴';
-
-            document.getElementById('prepMin').value = Math.floor(currentConfig.prepare / 60);
-            document.getElementById('prepSec').value = currentConfig.prepare % 60;
-
-            document.getElementById('workMin').value = Math.floor(currentConfig.work / 60);
-            document.getElementById('workSec').value = currentConfig.work % 60;
-
-            document.getElementById('restMin').value = Math.floor(currentConfig.rest / 60);
-            document.getElementById('restSec').value = currentConfig.rest % 60;
-
-            document.getElementById('cyclesInput').value = currentConfig.cycles;
-            document.getElementById('setsInput').value = currentConfig.sets;
-
-            document.getElementById('setRestMin').value = Math.floor(currentConfig.setRest / 60);
-            document.getElementById('setRestSec').value = currentConfig.setRest % 60;
-
-            document.getElementById('coolMin').value = Math.floor(currentConfig.cooldown / 60);
-            document.getElementById('coolSec').value = currentConfig.cooldown % 60;
-
-            document.getElementById('spurtWarnSelect').value = String(currentConfig.spurtWarn ?? 10);
-            document.getElementById('halfwayAlertCheck').checked = !!currentConfig.halfwayAlert;
-
-            onSetupChange();
+        /******************************************************************
+         * 6. 시간 설정 및 루틴 저장 관리
+         ******************************************************************/
+        function syncSetupForm() {
+            document.getElementById('routineNameInput').value = activeRoutine.name;
+            document.getElementById('prepMin').value = Math.floor(activeRoutine.prepare / 60);
+            document.getElementById('prepSec').value = activeRoutine.prepare % 60;
+            document.getElementById('workMin').value = Math.floor(activeRoutine.work / 60);
+            document.getElementById('workSec').value = activeRoutine.work % 60;
+            document.getElementById('restMin').value = Math.floor(activeRoutine.rest / 60);
+            document.getElementById('restSec').value = activeRoutine.rest % 60;
+            document.getElementById('cyclesInput').value = activeRoutine.cycles;
+            document.getElementById('setsInput').value = activeRoutine.sets;
+            document.getElementById('setRestMin').value = Math.floor(activeRoutine.setRest / 60);
+            document.getElementById('setRestSec').value = activeRoutine.setRest % 60;
+            updateSetupPreview();
         }
 
-        function readConfigFromSetupInputs() {
-            const clamp = (val, min, max) => Math.max(min, Math.min(max, parseInt(val) || 0));
-
-            const prepare = clamp(document.getElementById('prepMin').value, 0, 59) * 60 + clamp(document.getElementById('prepSec').value, 0, 59);
-            const work = Math.max(5, clamp(document.getElementById('workMin').value, 0, 59) * 60 + clamp(document.getElementById('workSec').value, 0, 59));
-            const rest = clamp(document.getElementById('restMin').value, 0, 59) * 60 + clamp(document.getElementById('restSec').value, 0, 59);
-            const cycles = clamp(document.getElementById('cyclesInput').value, 1, 99);
-            const sets = clamp(document.getElementById('setsInput').value, 1, 50);
-            const setRest = clamp(document.getElementById('setRestMin').value, 0, 59) * 60 + clamp(document.getElementById('setRestSec').value, 0, 59);
-            const cooldown = clamp(document.getElementById('coolMin').value, 0, 59) * 60 + clamp(document.getElementById('coolSec').value, 0, 59);
-            const spurtWarn = parseInt(document.getElementById('spurtWarnSelect').value) || 0;
-            const halfwayAlert = document.getElementById('halfwayAlertCheck').checked;
-            const name = document.getElementById('inputPresetName').value.trim() || '커스텀 체육관 루틴';
-
+        function readFormConfig() {
+            const num = (id, min, max) => Math.max(min, Math.min(max, parseInt(document.getElementById(id).value) || 0));
             return {
-                id: 'custom-' + Date.now(),
-                name,
-                prepare,
-                work,
-                rest,
-                cycles,
-                sets,
-                setRest,
-                cooldown,
-                spurtWarn,
-                halfwayAlert
+                id: 'rt-' + Date.now(),
+                name: document.getElementById('routineNameInput').value.trim() || '나만의 루틴',
+                prepare: num('prepMin', 0, 59) * 60 + num('prepSec', 0, 59),
+                work: Math.max(5, num('workMin', 0, 59) * 60 + num('workSec', 0, 59)),
+                rest: num('restMin', 0, 59) * 60 + num('restSec', 0, 59),
+                cycles: num('cyclesInput', 1, 99),
+                sets: num('setsInput', 1, 50),
+                setRest: num('setRestMin', 0, 59) * 60 + num('setRestSec', 0, 59)
             };
         }
 
-        function onSetupChange() {
-            const cfg = readConfigFromSetupInputs();
-            const previewList = buildTimeline(cfg);
-            const totalSec = getTotalTimelineDuration(previewList);
-            document.getElementById('setupTotalDuration').textContent = formatMMSS(totalSec);
+        function updateSetupPreview() {
+            const cfg = readFormConfig();
+            const list = compilePhases(cfg);
+            const total = list.reduce((acc, p) => acc + p.duration, 0);
+            document.getElementById('setupTotalTime').textContent = formatMMSS(total);
         }
 
-        function adjustTime(field, deltaSeconds) {
-            let minEl, secEl, minAllowed = 0;
-            if (field === 'prepare') { minEl = 'prepMin'; secEl = 'prepSec'; }
-            else if (field === 'work') { minEl = 'workMin'; secEl = 'workSec'; minAllowed = 5; }
-            else if (field === 'rest') { minEl = 'restMin'; secEl = 'restSec'; }
-            else if (field === 'setrest') { minEl = 'setRestMin'; secEl = 'setRestSec'; }
-            else if (field === 'cooldown') { minEl = 'coolMin'; secEl = 'coolSec'; }
-
-            const m = parseInt(document.getElementById(minEl).value) || 0;
-            const s = parseInt(document.getElementById(secEl).value) || 0;
-            const nextTotal = Math.max(minAllowed, m * 60 + s + deltaSeconds);
-
-            document.getElementById(minEl).value = Math.floor(nextTotal / 60);
-            document.getElementById(secEl).value = nextTotal % 60;
-            onSetupChange();
+        function stepTime(target, delta) {
+            const map = {
+                prepare: ['prepMin', 'prepSec', 0],
+                work: ['workMin', 'workSec', 5],
+                rest: ['restMin', 'restSec', 0],
+                setrest: ['setRestMin', 'setRestSec', 0]
+            };
+            const [mId, sId, minSec] = map[target];
+            const total = Math.max(minSec, (parseInt(document.getElementById(mId).value) || 0) * 60 + (parseInt(document.getElementById(sId).value) || 0) + delta);
+            document.getElementById(mId).value = Math.floor(total / 60);
+            document.getElementById(sId).value = total % 60;
+            updateSetupPreview();
         }
 
-        function adjustCount(field, delta) {
-            const elId = field === 'cycles' ? 'cyclesInput' : 'setsInput';
-            const el = document.getElementById(elId);
-            const cur = parseInt(el.value) || 1;
-            el.value = Math.max(1, Math.min(99, cur + delta));
-            onSetupChange();
+        function stepCount(id, delta) {
+            const el = document.getElementById(id);
+            el.value = Math.max(1, Math.min(99, (parseInt(el.value) || 1) + delta));
+            updateSetupPreview();
         }
 
-        function applySetupAndSwitchToTimer() {
-            const cfg = readConfigFromSetupInputs();
-            loadConfigIntoTimer(cfg);
+        function applySetupToTimer() {
+            const cfg = readFormConfig();
+            loadRoutineToTimer(cfg);
             switchTab('timer');
-            showToast(`'${cfg.name}' 설정이 적용되었습니다!`);
+            showToast('타이머에 설정이 적용되었습니다.');
         }
 
-        /**************************************************************
-         * 6. PRESETS STORAGE (localStorage + Backup Copy)
-         **************************************************************/
-        function loadPresetsFromStorage() {
+        function saveRoutine() {
+            const cfg = readFormConfig();
+            routines.unshift(cfg);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(routines));
+            renderRoutinesList();
+            loadRoutineToTimer(cfg);
+            showToast('루틴이 저장되었습니다.');
+        }
+
+        function loadStoredRoutines() {
             try {
                 const raw = localStorage.getItem(STORAGE_KEY);
                 if (raw) {
                     const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        savedPresets = parsed;
-                        renderPresetsList();
+                    if (Array.isArray(parsed) && parsed.length) {
+                        routines = parsed;
+                        renderRoutinesList();
                         return;
                     }
                 }
             } catch (e) {}
-            savedPresets = [...DEFAULT_PRESETS];
-            savePresetsToStorage();
-            renderPresetsList();
+            routines = [...DEFAULT_ROUTINES];
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(routines));
+            renderRoutinesList();
         }
 
-        function savePresetsToStorage() {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(savedPresets));
-            } catch (e) {}
-            document.getElementById('presetCountBadge').textContent = savedPresets.length;
-        }
-
-        function saveCurrentAsPreset() {
-            const cfg = readConfigFromSetupInputs();
-            savedPresets.unshift(cfg);
-            savePresetsToStorage();
-            renderPresetsList();
-            loadConfigIntoTimer(cfg);
-            showToast(`'${cfg.name}' 루틴이 보관함에 저장되었습니다!`);
-        }
-
-        function selectAndStartPreset(presetId, autoStart = false) {
-            const found = savedPresets.find(p => p.id === presetId);
-            if (!found) return;
-            loadConfigIntoTimer(found);
-            switchTab('timer');
-            if (autoStart) {
-                startTimer();
-            } else {
-                showToast(`'${found.name}' 루틴을 불러왔습니다.`);
-            }
-        }
-
-        function deletePreset(presetId) {
-            const idx = savedPresets.findIndex(p => p.id === presetId);
-            if (idx === -1) return;
-            const removedName = savedPresets[idx].name;
-            savedPresets.splice(idx, 1);
-            savePresetsToStorage();
-            renderPresetsList();
-            showToast(`'${removedName}' 루틴이 삭제되었습니다.`);
-        }
-
-        function exportPresetsJSON() {
-            const data = JSON.stringify(savedPresets, null, 2);
-            const temp = document.createElement('textarea');
-            temp.value = data;
-            document.body.appendChild(temp);
-            temp.select();
-            document.execCommand('copy');
-            document.body.removeChild(temp);
-            showToast('저장된 모든 루틴 설정이 클립보드에 복사되었습니다!');
-        }
-
-        function renderPresetsList() {
-            const container = document.getElementById('presetsListContainer');
-            document.getElementById('presetCountBadge').textContent = savedPresets.length;
-
-            if (savedPresets.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-12 text-slate-400 font-bold">
-                        저장된 루틴이 없습니다. '시간/세트 설정' 탭에서 루틴을 저장해보세요!
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = savedPresets.map(preset => {
-                const list = buildTimeline(preset);
-                const totalDur = formatMMSS(getTotalTimelineDuration(list));
+        function renderRoutinesList() {
+            const box = document.getElementById('savedRoutinesList');
+            box.innerHTML = routines.map(r => {
+                const total = compilePhases(r).reduce((a, b) => a + b.duration, 0);
                 return `
-                    <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 hover:border-amber-400/50 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div class="space-y-1.5">
-                            <div class="flex items-center gap-2">
-                                <span class="font-black text-sm sm:text-base text-white">${escapeHtml(preset.name)}</span>
-                                <span class="text-xs font-mono font-black px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                                    총 ${totalDur}
-                                </span>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-1.5 text-xs font-extrabold">
-                                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">운동 ${formatMMSS(preset.work)}</span>
-                                <span class="px-2 py-0.5 rounded bg-red-500/20 text-red-300">휴식 ${formatMMSS(preset.rest)}</span>
-                                <span class="px-2 py-0.5 rounded bg-slate-800 text-amber-300">${preset.cycles}라운드 × ${preset.sets}세트</span>
-                                ${preset.spurtWarn ? `<span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">🥢 ${preset.spurtWarn}초전 딱딱이</span>` : ''}
+                    <div class="flex items-center justify-between bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
+                        <div class="min-w-0 pr-2">
+                            <div class="font-extrabold text-sm text-white truncate">${r.name}</div>
+                            <div class="text-xs text-slate-400 font-semibold mt-0.5">
+                                운동 ${formatMMSS(r.work)} · 휴식 ${formatMMSS(r.rest)} · ${r.cycles}사이클 × ${r.sets}세트 (총 ${formatMMSS(total)})
                             </div>
                         </div>
-
-                        <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
-                            <button onclick="selectAndStartPreset('${preset.id}', false)" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-xs transition active:scale-95">
-                                불러오기
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button onclick="pickRoutine('${r.id}')" class="px-3.5 py-2 rounded-xl bg-teal-400 text-slate-950 font-black text-xs">
+                                선택
                             </button>
-                            <button onclick="selectAndStartPreset('${preset.id}', true)" class="px-4 py-2.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black text-xs flex items-center gap-1.5 transition active:scale-95 shadow-lg">
-                                <i class="fa-solid fa-play"></i> 바로 시작
-                            </button>
-                            <button onclick="deletePreset('${preset.id}')" class="p-2.5 rounded-xl bg-slate-900 hover:bg-red-500/20 text-slate-400 hover:text-red-400 border border-slate-800 transition" title="삭제">
+                            <button onclick="removeRoutine('${r.id}')" class="w-8 h-8 rounded-xl bg-slate-900 text-slate-400 hover:text-rose-400">
                                 <i class="fa-solid fa-trash-can text-xs"></i>
                             </button>
                         </div>
@@ -1571,138 +909,160 @@
             }).join('');
         }
 
-        function escapeHtml(str) {
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;');
+        function pickRoutine(id) {
+            const found = routines.find(r => r.id === id);
+            if (!found) return;
+            loadRoutineToTimer(found);
+            switchTab('timer');
+            showToast(`'${found.name}' 루틴을 불러왔습니다.`);
         }
 
-        /**************************************************************
-         * 7. NAVIGATION, FULLSCREEN, WAKE LOCK & MODAL CONTROLS
-         **************************************************************/
-        function switchTab(tabName) {
-            const tabs = ['timer', 'setup', 'presets'];
-            tabs.forEach(t => {
-                const section = document.getElementById(`tab-${t}`);
-                const btn = document.getElementById(`navBtn-${t}`);
-                if (t === tabName) {
-                    section.classList.remove('hidden');
-                    section.classList.add('flex');
-                    btn.className = 'py-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 bg-white text-slate-950 shadow transition';
+        function removeRoutine(id) {
+            routines = routines.filter(r => r.id !== id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(routines));
+            renderRoutinesList();
+        }
+
+        /******************************************************************
+         * 7. 탭 전환, 사운드 옵션, 에메랄드 아이콘(icon.png) 생성기
+         ******************************************************************/
+        function switchTab(tab) {
+            ['timer', 'setup', 'routines'].forEach(t => {
+                const sec = document.getElementById(`tab-${t}`);
+                const nav = document.getElementById(`nav-${t}`);
+                if (t === tab) {
+                    sec.classList.remove('hidden');
+                    sec.classList.add('flex');
+                    nav.className = 'py-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-1.5 bg-white text-slate-900 shadow';
                 } else {
-                    section.classList.add('hidden');
-                    section.classList.remove('flex');
-                    btn.className = 'py-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 text-white/75 hover:text-white transition';
+                    sec.classList.add('hidden');
+                    sec.classList.remove('flex');
+                    nav.className = 'py-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-1.5 text-white/75 hover:text-white';
                 }
             });
-        }
 
-        function toggleFullScreen() {
-            const icon = document.getElementById('fullscreenIcon');
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().then(() => {
-                    icon.className = 'fa-solid fa-compress text-sm w-4 text-center text-amber-400';
-                }).catch(() => {});
+            if (tab !== 'timer') {
+                document.getElementById('appBody').style.backgroundColor = '#0F172A';
             } else {
-                document.exitFullscreen().then(() => {
-                    icon.className = 'fa-solid fa-expand text-sm w-4 text-center';
-                }).catch(() => {});
+                renderTimerScreen();
             }
         }
 
         function toggleMute() {
-            audioSettings.muted = !audioSettings.muted;
-            const icon = document.getElementById('soundToggleIcon');
-            if (audioSettings.muted) {
-                icon.className = 'fa-solid fa-volume-xmark text-sm w-4 text-center text-red-400';
-                showToast('알림음이 음소거되었습니다.');
-            } else {
-                icon.className = 'fa-solid fa-volume-high text-sm w-4 text-center text-emerald-400';
-                testSound('work');
-                showToast('300% 고출력 알림음이 활성화되었습니다.');
-            }
+            soundConfig.muted = !soundConfig.muted;
+            document.getElementById('muteIcon').className = soundConfig.muted
+                ? 'fa-solid fa-volume-xmark text-rose-300 text-base'
+                : 'fa-solid fa-volume-high text-base';
+            showToast(soundConfig.muted ? '음소거 되었습니다.' : '소리가 켜졌습니다.');
         }
 
-        function openAudioModal() {
-            const modal = document.getElementById('audioModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+        function selectSoundType(type) {
+            soundConfig.type = type;
+            document.getElementById('soundBtn-bell').className = type === 'bell'
+                ? 'p-3 rounded-2xl border-2 border-teal-400 bg-teal-400/15 text-white font-bold text-xs text-center'
+                : 'p-3 rounded-2xl border border-slate-800 bg-slate-950 text-slate-300 font-bold text-xs text-center';
+            document.getElementById('soundBtn-chime').className = type === 'chime'
+                ? 'p-3 rounded-2xl border-2 border-teal-400 bg-teal-400/15 text-white font-bold text-xs text-center'
+                : 'p-3 rounded-2xl border border-slate-800 bg-slate-950 text-slate-300 font-bold text-xs text-center';
+            previewCurrentSound();
         }
 
-        function closeAudioModal() {
-            const modal = document.getElementById('audioModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+        function updateVolume(val) {
+            soundConfig.volume = parseInt(val) / 100;
+            document.getElementById('volValueText').textContent = `${val}%`;
+            initAudio();
         }
 
-        const PROFILE_NAMES = {
-            bell: '대형 복싱 공 + 딱딱이',
-            whistle: '심판 전자 호루라기',
-            horn: '경기장 에어혼 버저',
-            beep: '3000Hz 고주파 비프'
-        };
-
-        function setSoundStyle(style) {
-            audioSettings.style = style;
-            document.getElementById('currentSoundProfileBadge').textContent = PROFILE_NAMES[style];
-
-            ['bell', 'whistle', 'horn', 'beep'].forEach(k => {
-                const btn = document.getElementById(`soundStyle-${k}`);
-                if (k === style) {
-                    btn.className = 'p-3 rounded-xl border-2 border-amber-400 bg-amber-400/20 text-white font-black text-xs flex flex-col items-center gap-1';
-                } else {
-                    btn.className = 'p-3 rounded-xl border border-slate-700 bg-slate-800/70 text-slate-300 font-black text-xs flex flex-col items-center gap-1';
-                }
-            });
-            testSound('work');
+        function toggleVoice(checked) {
+            soundConfig.voice = checked;
         }
 
-        function toggleVoiceSetting(checked) {
-            audioSettings.voice = checked;
-            if (checked) speakKorean('한국어 음성 코칭이 켜졌습니다!');
-        }
+        // 푸른 에메랄드빛 알람시계 아이콘을 512x512 정식 icon.png로 즉시 다운로드하는 함수
+        function downloadEmeraldIconPNG() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
 
-        function toggleStrobeSetting(checked) {
-            audioSettings.strobe = checked;
-            if (checked) triggerGymVisualAndHaptic([100]);
-        }
+            // 1. 푸른 에메랄드 그라데이션 배경
+            const grad = ctx.createLinearGradient(0, 0, 512, 512);
+            grad.addColorStop(0, '#14B8A6'); // Teal-500
+            grad.addColorStop(1, '#0284C7'); // Sky-600
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.roundRect(0, 0, 512, 512, 115);
+            ctx.fill();
 
-        function changeVolume(val) {
-            const pct = parseInt(val) || 250;
-            audioSettings.boostGain = pct / 100;
-            document.getElementById('volumeLabel').textContent = `${pct}%`;
-            ensureAudioContext();
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.fillStyle = '#FFFFFF';
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // 2. 상단 알람시계 꼭지 & 양쪽 종(Bell)
+            ctx.lineWidth = 24;
+            ctx.beginPath();
+            ctx.moveTo(216, 82);
+            ctx.lineTo(296, 82);
+            ctx.moveTo(256, 82);
+            ctx.lineTo(256, 118);
+            ctx.stroke();
+
+            // 왼쪽/오른쪽 알람 벨
+            ctx.lineWidth = 22;
+            ctx.beginPath();
+            ctx.arc(140, 140, 42, Math.PI * 0.85, Math.PI * 1.65);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(372, 140, 42, Math.PI * 1.35, Math.PI * 0.15);
+            ctx.stroke();
+
+            // 3. 시계 본체 원
+            ctx.lineWidth = 28;
+            ctx.beginPath();
+            ctx.arc(256, 286, 152, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // 4. 시계 바늘
+            ctx.lineWidth = 24;
+            ctx.beginPath();
+            ctx.moveTo(256, 286);
+            ctx.lineTo(256, 195);
+            ctx.moveTo(256, 286);
+            ctx.lineTo(322, 325);
+            ctx.stroke();
+
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'icon.png';
+                a.click();
+                URL.revokeObjectURL(url);
+            }, 'image/png');
         }
 
         async function requestWakeLock() {
             if ('wakeLock' in navigator) {
-                try {
-                    wakeLockSentinel = await navigator.wakeLock.request('screen');
-                    const badge = document.getElementById('wakeLockBadge');
-                    badge.classList.remove('hidden');
-                    badge.classList.add('flex');
-                } catch (e) {}
+                try { await navigator.wakeLock.request('screen'); } catch (e) {}
             }
         }
 
-        let toastTimeout = null;
-        function showToast(message) {
-            const box = document.getElementById('toastBox');
-            document.getElementById('toastText').textContent = message;
-            box.classList.remove('opacity-0', '-translate-y-2');
-            box.classList.add('opacity-100', 'translate-y-0');
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                box.classList.add('opacity-0', '-translate-y-2');
-                box.classList.remove('opacity-100', 'translate-y-0');
-            }, 2400);
+        let toastTimer = null;
+        function showToast(msg) {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.classList.remove('opacity-0');
+            el.classList.add('opacity-100');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                el.classList.remove('opacity-100');
+                el.classList.add('opacity-0');
+            }, 2000);
         }
 
-        window.onload = function () {
-            loadPresetsFromStorage();
-            loadConfigIntoTimer(savedPresets[0] || DEFAULT_PRESETS[0]);
+        window.onload = () => {
+            loadStoredRoutines();
+            loadRoutineToTimer(routines[0]);
         };
     </script>
 </body>

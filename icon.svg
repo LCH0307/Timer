@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14B8A6" />
+      <stop offset="100%" stop-color="#0284C7" />
+    </linearGradient>
+  </defs>
+  <!-- 푸른 에메랄드빛 라운드 스퀘어 배경 -->
+  <rect width="512" height="512" rx="115" fill="url(#emeraldGrad)" />
+  <!-- 상단 타이머 버튼 -->
+  <path d="M216 82 H296 M256 82 V118" stroke="#FFFFFF" stroke-width="26" stroke-linecap="round" />
+  <!-- 좌우 알람 벨 -->
+  <path d="M104 162 A46 46 0 0 1 168 102" fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" />
+  <path d="M344 102 A46 46 0 0 1 408 162" fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" />
+  <!-- 시계 본체 -->
+  <circle cx="256" cy="286" r="152" fill="none" stroke="#FFFFFF" stroke-width="30" />
+  <!-- 시계 바늘 -->
+  <path d="M256 286 V192 M256 286 L324 326" stroke="#FFFFFF" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="256" cy="286" r="14" fill="#FFFFFF" />
+</svg>
